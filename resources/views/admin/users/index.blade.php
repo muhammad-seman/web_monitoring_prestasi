@@ -11,6 +11,16 @@
           <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">Tambah User</button>
         </div>
 
+        @if ($errors->any())
+          <div class="alert alert-danger mt-3">
+            <ul class="mb-0">
+              @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
+
         <div class="table-responsive mt-4">
           <table class="table table-bordered">
             <thead>
@@ -28,12 +38,22 @@
               @foreach($users as $user)
               <tr>
                 <td>{{ $loop->iteration }}</td>
-                <td>{{ $user->name }}</td>
+                <td>{{ $user->nama }}</td>
                 <td>{{ $user->username }}</td>
                 <td>{{ $user->email }}</td>
                 <td>
-                  <span class="badge bg-{{ $user->role == 'admin' ? 'primary' : 'secondary' }}">
-                    {{ ucfirst($user->role) }}
+                  @php
+                    $badge = match($user->role) {
+                      'admin'          => 'primary',
+                      'kepala_sekolah' => 'danger',
+                      'guru'           => 'success',
+                      'siswa'          => 'warning',
+                      'wali'           => 'info',
+                      default          => 'secondary'
+                    };
+                  @endphp
+                  <span class="badge bg-{{ $badge }}">
+                    {{ ucwords(str_replace('_', ' ', $user->role)) }}
                   </span>
                 </td>
                 <td>
@@ -71,7 +91,7 @@
       <div class="modal-body">
         <div class="mb-3">
           <label>Nama</label>
-          <input type="text" name="name" class="form-control" value="{{ $user->name }}" required>
+          <input type="text" name="nama" class="form-control" value="{{ $user->nama }}" required>
         </div>
         <div class="mb-3">
           <label>Username</label>
@@ -85,11 +105,12 @@
           <label>Role</label>
           <select name="role" class="form-control" required>
             <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
-            <option value="kepala" {{ $user->role == 'kepala' ? 'selected' : '' }}>Kepala</option>
-            <option value="pegawai" {{ $user->role == 'pegawai' ? 'selected' : '' }}>Pegawai</option>
+            <option value="kepala_sekolah" {{ $user->role == 'kepala_sekolah' ? 'selected' : '' }}>Kepala Sekolah</option>
+            <option value="guru" {{ $user->role == 'guru' ? 'selected' : '' }}>Guru</option>
+            <option value="siswa" {{ $user->role == 'siswa' ? 'selected' : '' }}>Siswa</option>
+            <option value="wali" {{ $user->role == 'wali' ? 'selected' : '' }}>Wali</option>
           </select>
         </div>
-
         <div class="mb-3">
           <label>Status</label>
           <select name="status" class="form-control" required>
@@ -125,7 +146,7 @@
       <div class="modal-body">
         <div class="mb-3">
           <label>Nama</label>
-          <input type="text" name="name" class="form-control" required>
+          <input type="text" name="nama" class="form-control" required>
         </div>
         <div class="mb-3">
           <label>Username</label>
@@ -145,11 +166,12 @@
           <label>Role</label>
           <select name="role" class="form-control" required>
             <option value="admin">Admin</option>
-            <option value="kepala">Kepala</option>
-            <option value="pegawai">Pegawai</option>
+            <option value="kepala_sekolah">Kepala Sekolah</option>
+            <option value="guru">Guru</option>
+            <option value="siswa">Siswa</option>
+            <option value="wali">Wali</option>
           </select>
         </div>
-
         <div class="mb-3">
           <label>Status</label>
           <select name="status" class="form-control" required>

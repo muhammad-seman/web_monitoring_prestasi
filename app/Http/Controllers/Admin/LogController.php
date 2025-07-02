@@ -31,7 +31,7 @@ class LogController extends Controller
         }
 
         $logs = $query->paginate(15);
-        $users = User::pluck('name', 'id'); // Buat filter user di view
+        $users = User::pluck('nama', 'id'); // <- INI SUDAH FIX
 
         return view('admin.logs.index', compact('logs', 'users'));
     }

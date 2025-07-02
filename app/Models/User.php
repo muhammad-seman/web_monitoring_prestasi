@@ -12,40 +12,20 @@ class User extends Authenticatable
 
     // Mass assignable attributes
     protected $fillable = [
-        'name',
+        'nama',
         'username',
         'email',
         'password',
         'role',
         'status',
     ];
-
-    // Attributes to hide
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    // Type casting
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
-
-    /**
-     * Relasi ke tabel employees (jika user punya satu data pegawai)
-     */
-    // public function employee()
-    // {
-    //     return $this->hasOne(Employee::class);
-    // }
-
     /**
      * Relasi ke activity logs
      */
-    // public function activityLogs()
-    // {
-    //     return $this->hasMany(ActivityLog::class);
-    // }
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
 
+    // Tambahkan relasi lain jika perlu (siswa, wali, dll)
 }

@@ -10,8 +10,8 @@
             <div class="col">
                 <select name="user_id" class="form-control">
                     <option value="">Semua User</option>
-                    @foreach($users as $id => $name)
-                        <option value="{{ $id }}" {{ request('user_id') == $id ? 'selected' : '' }}>{{ $name }}</option>
+                    @foreach($users as $id => $nama)
+                        <option value="{{ $id }}" {{ request('user_id') == $id ? 'selected' : '' }}>{{ $nama }}</option>
                     @endforeach
                 </select>
             </div>
@@ -44,7 +44,7 @@
                 @forelse($logs as $log)
                     <tr>
                         <td>{{ $log->created_at }}</td>
-                        <td>{{ $log->user->name ?? '-' }}</td>
+                        <td>{{ $log->user->nama ?? '-' }}</td>
                         <td>{{ ucfirst($log->action) }}</td>
                         <td>{{ ucfirst($log->module) }}</td>
                         <td>{{ $log->description }}</td>

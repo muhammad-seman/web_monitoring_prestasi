@@ -27,18 +27,18 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
+            'nama'     => 'required|string|max:255',
             'username' => 'required|string|max:50|unique:users',
             'email'    => 'required|email|unique:users',
             'password' => 'required|string|min:6|confirmed',
-            'role'     => 'required|in:admin,kepala,pegawai',
+            'role'     => 'required|in:admin,kepala_sekolah,guru,siswa,wali',
             'status'   => 'required|in:active,inactive',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
 
         User::create($validated);
-        ActivityLogger::log('create', 'user', 'Tambah user: ' . $request->name);
+        ActivityLogger::log('create', 'user', 'Tambah user: ' . $request->nama);
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambah.');
     }
@@ -59,10 +59,10 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
+            'nama'     => 'required|string|max:255',
             'username' => 'required|string|max:50|unique:users,username,' . $user->id,
             'email'    => 'required|email|unique:users,email,' . $user->id,
-            'role'     => 'required|in:admin,kepala,pegawai',
+            'role'     => 'required|in:admin,kepala_sekolah,guru,siswa,wali',
             'status'   => 'required|in:active,inactive',
         ]);
 
@@ -71,14 +71,14 @@ class UserController extends Controller
         }
 
         $user->update($validated);
-        ActivityLogger::log('update', 'user', 'Update user: ' . $user->name);
+        ActivityLogger::log('update', 'user', 'Update user: ' . $user->nama);
         return redirect()->route('admin.users.index')->with('success', 'User berhasil diupdate.');
     }
 
     // Hapus user
     public function destroy(User $user)
     {
-        $userName = $user->name;
+        $userName = $user->nama;
         $user->delete();
         ActivityLogger::log('delete', 'user', 'Hapus user: ' . $userName);
         return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
