@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\EkstrakurikulerController;
 use App\Http\Controllers\Admin\KategoriPrestasiController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\LogController;
@@ -26,6 +27,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('siswa', SiswaController::class);
     Route::resource('kategori_prestasi', KategoriPrestasiController::class);
     Route::resource('tingkat_penghargaan', TingkatPenghargaanController::class);
+    Route::resource('ekstrakurikuler', EkstrakurikulerController::class);
 });
 
 // Jika nanti role 'kepala', 'pegawai', dll tinggal tambahkan group serupa:

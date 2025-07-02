@@ -59,6 +59,12 @@
             <span class="hide-menu">Tingkat Penghargaan</span>
           </a>
         </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" href="{{ route('admin.ekstrakurikuler.index') }}" aria-expanded="false">
+            <i class="ti ti-school"></i>
+            <span class="hide-menu">Ekstrakurikuler</span>
+          </a>
+        </li>
         @endif
 
       </ul>
