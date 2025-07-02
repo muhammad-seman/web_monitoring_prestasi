@@ -1,50 +1,78 @@
 <?php
 
-namespace App\Http\Controllers;
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Helpers\ActivityLogger;
+use App\Http\Controllers\Controller;
 use App\Models\Kelas;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class KelasController extends Controller
 {
+    // Tampilkan semua kelas
     public function index()
     {
-        return response()->json(Kelas::with('wali')->paginate(10));
+        $kelas = Kelas::with('wali')->paginate(10);
+        $wali = User::whereIn('role', ['guru'])->pluck('nama', 'id');
+        return view('admin.kelas.index', compact('kelas', 'wali'));
     }
 
+    // Store kelas baru
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama_kelas'    => 'required|max:30',
+            'nama_kelas'    => 'required|string|max:50',
             'id_wali_kelas' => 'nullable|exists:users,id',
-            'tahun_ajaran'  => 'nullable|max:10',
+            'tahun_ajaran'  => 'required|string|max:20',
         ]);
-        $kelas = Kelas::create($validated);
-        return response()->json($kelas, 201);
+
+        $kls = Kelas::create($validated);
+
+        // Logger: create
+        ActivityLogger::log(
+            'create',
+            'kelas',
+            'Tambah kelas: ' . $kls->nama_kelas
+        );
+
+        return redirect()->route('admin.kelas.index')->with('success', 'Kelas berhasil ditambah.');
     }
 
-    public function show($id)
+    // Update kelas
+    public function update(Request $request, Kelas $kela)
     {
-        return response()->json(Kelas::with('wali', 'siswa')->findOrFail($id));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $kelas = Kelas::findOrFail($id);
         $validated = $request->validate([
-            'nama_kelas'    => 'sometimes|required|max:30',
+            'nama_kelas'    => 'required|string|max:50',
             'id_wali_kelas' => 'nullable|exists:users,id',
-            'tahun_ajaran'  => 'nullable|max:10',
+            'tahun_ajaran'  => 'required|string|max:20',
         ]);
-        $kelas->update($validated);
-        return response()->json($kelas);
+
+        $kela->update($validated);
+
+        // Logger: update
+        ActivityLogger::log(
+            'update',
+            'kelas',
+            'Update kelas: ' . $kela->nama_kelas
+        );
+
+        return redirect()->route('admin.kelas.index')->with('success', 'Kelas berhasil diupdate.');
     }
 
-    public function destroy($id)
+    // Hapus kelas
+    public function destroy(Kelas $kela)
     {
-        $kelas = Kelas::findOrFail($id);
-        $kelas->delete();
-        return response()->json(['message' => 'Kelas deleted']);
+        $nama = $kela->nama_kelas;
+        $kela->delete();
+
+        // Logger: delete
+        ActivityLogger::log(
+            'delete',
+            'kelas',
+            'Hapus kelas: ' . $nama
+        );
+
+        return redirect()->route('admin.kelas.index')->with('success', 'Kelas berhasil dihapus.');
     }
 }

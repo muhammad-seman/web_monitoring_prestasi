@@ -35,6 +35,30 @@
             <span class="hide-menu">Riwayat Aktivitas</span>
           </a>
         </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" href="{{ route('admin.kelas.index') }}" aria-expanded="false">
+            <i class="ti ti-school"></i>
+            <span class="hide-menu">Manajemen Kelas</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" href="{{ route('admin.siswa.index') }}" aria-expanded="false">
+            <i class="ti ti-user"></i>
+            <span class="hide-menu">Manajemen Siswa</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" href="{{ route('admin.kategori_prestasi.index') }}" aria-expanded="false">
+            <i class="ti ti-award"></i>
+            <span class="hide-menu">Kategori Prestasi</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" href="{{ route('admin.tingkat_penghargaan.index') }}" aria-expanded="false">
+            <i class="ti ti-award"></i>
+            <span class="hide-menu">Tingkat Penghargaan</span>
+          </a>
+        </li>
         @endif
 
       </ul>

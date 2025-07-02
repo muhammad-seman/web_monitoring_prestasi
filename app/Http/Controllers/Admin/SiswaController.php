@@ -1,56 +1,86 @@
 <?php
-namespace App\Http\Controllers;
 
+namespace App\Http\Controllers\Admin;
+
+use App\Helpers\ActivityLogger;
+use App\Http\Controllers\Controller;
 use App\Models\Siswa;
+use App\Models\Kelas;
 use Illuminate\Http\Request;
 
 class SiswaController extends Controller
 {
+    // Tampilkan semua siswa
     public function index()
     {
-        return response()->json(Siswa::with('kelas')->paginate(10));
+        $siswa = Siswa::with('kelas')->paginate(10);
+        $kelas = Kelas::pluck('nama_kelas', 'id');
+        return view('admin.siswa.index', compact('siswa', 'kelas'));
     }
 
+    // Store siswa baru
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nisn'          => 'required|unique:siswa,nisn',
-            'nama'          => 'required|max:100',
-            'jenis_kelamin' => 'required|in:L,P',
-            'tanggal_lahir' => 'nullable|date',
-            'id_kelas'      => 'nullable|exists:kelas,id',
-            'alamat'        => 'nullable|string',
-            'tahun_masuk'   => 'nullable|integer|min:2000|max:2100',
+            'nisn'           => 'required|string|max:20|unique:siswa',
+            'nama'           => 'required|string|max:100',
+            'jenis_kelamin'  => 'required|in:L,P',
+            'tanggal_lahir'  => 'nullable|date',
+            'alamat'         => 'nullable|string|max:255',
+            'id_kelas'       => 'required|exists:kelas,id',
+            'tahun_masuk'    => 'nullable|string|max:9', // contoh: 2023/2024
         ]);
-        $siswa = Siswa::create($validated);
-        return response()->json($siswa, 201);
+
+        $s = Siswa::create($validated);
+
+        // Logger: create
+        ActivityLogger::log(
+            'create',
+            'siswa',
+            'Tambah siswa: ' . $s->nama . ' (NISN: ' . $s->nisn . ')'
+        );
+
+        return redirect()->route('admin.siswa.index')->with('success', 'Siswa berhasil ditambah.');
     }
 
-    public function show($id)
+    // Update siswa
+    public function update(Request $request, Siswa $siswa)
     {
-        return response()->json(Siswa::with('kelas')->findOrFail($id));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $siswa = Siswa::findOrFail($id);
         $validated = $request->validate([
-            'nisn'          => 'sometimes|required|unique:siswa,nisn,'.$siswa->id,
-            'nama'          => 'sometimes|required|max:100',
-            'jenis_kelamin' => 'sometimes|required|in:L,P',
-            'tanggal_lahir' => 'nullable|date',
-            'id_kelas'      => 'nullable|exists:kelas,id',
-            'alamat'        => 'nullable|string',
-            'tahun_masuk'   => 'nullable|integer|min:2000|max:2100',
+            'nisn'           => 'required|string|max:20|unique:siswa,nisn,' . $siswa->id,
+            'nama'           => 'required|string|max:100',
+            'jenis_kelamin'  => 'required|in:L,P',
+            'tanggal_lahir'  => 'nullable|date',
+            'alamat'         => 'nullable|string|max:255',
+            'id_kelas'       => 'required|exists:kelas,id',
+            'tahun_masuk'    => 'nullable|string|max:9',
         ]);
+
         $siswa->update($validated);
-        return response()->json($siswa);
+
+        // Logger: update
+        ActivityLogger::log(
+            'update',
+            'siswa',
+            'Update siswa: ' . $siswa->nama . ' (NISN: ' . $siswa->nisn . ')'
+        );
+
+        return redirect()->route('admin.siswa.index')->with('success', 'Siswa berhasil diupdate.');
     }
 
-    public function destroy($id)
+    // Hapus siswa
+    public function destroy(Siswa $siswa)
     {
-        $siswa = Siswa::findOrFail($id);
+        $desc = $siswa->nama . ' (NISN: ' . $siswa->nisn . ')';
         $siswa->delete();
-        return response()->json(['message' => 'Siswa deleted']);
+
+        // Logger: delete
+        ActivityLogger::log(
+            'delete',
+            'siswa',
+            'Hapus siswa: ' . $desc
+        );
+
+        return redirect()->route('admin.siswa.index')->with('success', 'Siswa berhasil dihapus.');
     }
 }
