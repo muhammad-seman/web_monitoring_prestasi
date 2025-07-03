@@ -16,7 +16,8 @@
         </li>
         <!-- Hanya admin -->
         @if(auth()->user()->role === 'admin')
-        <!-- Dashboard -->
+
+        <!-- ======= DASHBOARD ======= -->
         <li class="sidebar-item">
           <a class="sidebar-link" href="{{ route('admin.dashboard') }}" aria-expanded="false">
             <i class="ti ti-atom"></i>
@@ -24,15 +25,18 @@
           </a>
         </li>
         <li class="sidebar-item">
-          <a class="sidebar-link" href="{{ route('admin.users.index') }}" aria-expanded="false">
-            <i class="ti ti-users"></i>
-            <span class="hide-menu">Manajemen User</span>
-          </a>
-        </li>
-        <li class="sidebar-item">
           <a class="sidebar-link" href="{{ route('admin.logs.index') }}" aria-expanded="false">
             <i class="ti ti-list-details"></i>
             <span class="hide-menu">Riwayat Aktivitas</span>
+          </a>
+        </li>
+
+        <!-- ======= MASTER DATA ======= -->
+        <li class="sidebar-title mt-3 mb-1 fw-bold text-secondary">MASTER DATA</li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" href="{{ route('admin.users.index') }}" aria-expanded="false">
+            <i class="ti ti-users"></i>
+            <span class="hide-menu">Manajemen User</span>
           </a>
         </li>
         <li class="sidebar-item">
@@ -63,6 +67,15 @@
           <a class="sidebar-link" href="{{ route('admin.ekstrakurikuler.index') }}" aria-expanded="false">
             <i class="ti ti-school"></i>
             <span class="hide-menu">Ekstrakurikuler</span>
+          </a>
+        </li>
+
+        <!-- ======= DATA PRESTASI SISWA ======= -->
+        <li class="sidebar-title mt-3 mb-1 fw-bold text-secondary">TRANSAKSI</li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" href="{{ route('admin.prestasi_siswa.index') }}" aria-expanded="false">
+            <i class="ti ti-trophy"></i>
+            <span class="hide-menu">Data Prestasi Siswa</span>
           </a>
         </li>
         @endif

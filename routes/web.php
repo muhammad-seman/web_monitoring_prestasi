@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\EkstrakurikulerController;
 use App\Http\Controllers\Admin\KategoriPrestasiController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\LogController;
+use App\Http\Controllers\Admin\PrestasiSiswaController;
 use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Admin\TingkatPenghargaanController;
 use App\Http\Controllers\AuthController;
@@ -28,6 +29,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('kategori_prestasi', KategoriPrestasiController::class);
     Route::resource('tingkat_penghargaan', TingkatPenghargaanController::class);
     Route::resource('ekstrakurikuler', EkstrakurikulerController::class);
+    Route::resource('prestasi_siswa', PrestasiSiswaController::class);
 });
 
 // Jika nanti role 'kepala', 'pegawai', dll tinggal tambahkan group serupa:
