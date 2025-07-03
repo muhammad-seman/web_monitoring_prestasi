@@ -1,16 +1,53 @@
 @extends('layouts.app')
 @section('title', 'Manajemen Siswa')
 @section('content')
+<script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
 <div class="row">
     <div class="col-lg-12">
         <div class="card w-100">
             <div class="card-body">
-                <div class="d-md-flex align-items-center justify-content-between">
-                    <h4 class="card-title">Manajemen Siswa</h4>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSiswaModal">Tambah
-                        Siswa</button>
+
+                {{-- HEADER + FILTER --}}
+                <div class="d-md-flex align-items-center justify-content-between mb-3">
+                    <h4 class="card-title mb-0">Manajemen Siswa</h4>
+                    <div class="d-flex gap-2">
+                        <form method="GET" class="d-flex align-items-center gap-2">
+                            <select name="kelas" class="form-select" style="min-width:140px">
+                                <option value="">Semua Kelas</option>
+                                @foreach($kelas as $id => $nama_kelas)
+                                <option value="{{ $id }}" {{ request('kelas')==$id ? 'selected' : '' }}>
+                                    {{ $nama_kelas }}
+                                </option>
+                                @endforeach
+                            </select>
+                            <select name="jenis_kelamin" class="form-select" style="min-width:140px">
+                                <option value="">Semua Gender</option>
+                                <option value="L" {{ request('jenis_kelamin')=='L' ? 'selected' : '' }}>Laki-laki
+                                </option>
+                                <option value="P" {{ request('jenis_kelamin')=='P' ? 'selected' : '' }}>Perempuan
+                                </option>
+                            </select>
+                            <input type="text" name="tahun_masuk" class="form-control" style="min-width:110px"
+                                placeholder="Tahun Masuk" value="{{ request('tahun_masuk') }}">
+                            <button type="submit" class="btn btn-secondary" title="Terapkan Filter">
+                                <span class="iconify" data-icon="mdi:filter-variant" data-width="20"></span>
+                            </button>
+                        </form>
+                        <a href="{{ route('admin.siswa.index') }}" class="btn btn-light" title="Reset Filter">
+                            <span class="iconify" data-icon="mdi:refresh" data-width="20"></span>
+                        </a>
+                        <a href="{{ route('admin.siswa.cetak', request()->all()) }}" class="btn btn-success"
+                            target="_blank" title="Cetak PDF">
+                            <span class="iconify" data-icon="mdi:printer" data-width="20"></span>
+                        </a>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSiswaModal"
+                            title="Tambah Siswa">
+                            <span class="iconify" data-icon="mdi:plus" data-width="20"></span>
+                        </button>
+                    </div>
                 </div>
 
+                {{-- ERROR --}}
                 @if ($errors->any())
                 <div class="alert alert-danger mt-3">
                     <ul class="mb-0">
@@ -21,58 +58,68 @@
                 </div>
                 @endif
 
+                {{-- TABLE --}}
                 <div class="table-responsive mt-4">
-                    <table class="table table-bordered">
-                        <thead>
+                    <table class="table table-bordered align-middle">
+                        <table class="table table-bordered">
                             <tr>
-                                <th>No</th>
+                                <th>#</th>
                                 <th>NISN</th>
                                 <th>Nama</th>
                                 <th>Kelas</th>
-                                <th>Jenis Kelamin</th>
+                                <th>Gender</th>
                                 <th>Tanggal Lahir</th>
                                 <th>Alamat</th>
                                 <th>Tahun Masuk</th>
                                 <th>Aksi</th>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($siswa as $s)
-                            <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td>{{ $s->nisn }}</td>
-                                <td>{{ $s->nama }}</td>
-                                <td>{{ $s->kelas->nama_kelas ?? '-' }}</td>
-                                <td>
-                                    <span class="badge bg-{{ $s->jenis_kelamin == 'L' ? 'primary' : 'warning' }}">
-                                        {{ $s->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}
-                                    </span>
-                                </td>
-                                <td>
-                                    {{ $s->tanggal_lahir ? \Carbon\Carbon::parse($s->tanggal_lahir)->format('d-m-Y') :
-                                    '-' }}
-                                </td>
-                                <td>{{ $s->alamat ?? '-' }}</td>
-                                <td>{{ $s->tahun_masuk ?? '-' }}</td>
-                                <td>
-                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#editSiswaModal{{ $s->id }}">Edit</button>
-                                    <button class="btn btn-danger btn-sm"
-                                        onclick="confirmDelete({{ $s->id }})">Hapus</button>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                    {{ $siswa->links("pagination::bootstrap-4") }}
+                            </thead>
+                            <tbody>
+                                @forelse($siswa as $s)
+                                <tr>
+                                    <td>{{ $loop->iteration + ($siswa->perPage() * ($siswa->currentPage()-1)) }}</td>
+                                    <td>{{ $s->nisn }}</td>
+                                    <td>{{ $s->nama }}</td>
+                                    <td>{{ $s->kelas->nama_kelas ?? '-' }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ $s->jenis_kelamin == 'L' ? 'primary' : 'warning' }}">
+                                            <span class="iconify"
+                                                data-icon="mdi:{{ $s->jenis_kelamin == 'L' ? 'gender-male' : 'gender-female' }}"></span>
+                                            {{ $s->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $s->tanggal_lahir ? \Carbon\Carbon::parse($s->tanggal_lahir)->format('d-m-Y')
+                                        :
+                                        '-' }}</td>
+                                    <td>{{ $s->alamat ?? '-' }}</td>
+                                    <td>{{ $s->tahun_masuk ?? '-' }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
+                                            data-bs-target="#editSiswaModal{{ $s->id }}" title="Edit">
+                                            <span class="iconify" data-icon="mdi:pencil" data-width="18"></span>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete({{ $s->id }})"
+                                            title="Hapus">
+                                            <span class="iconify" data-icon="mdi:trash-can" data-width="18"></span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="9" class="text-center">Tidak ada data siswa.</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                        {{ $siswa->appends(request()->all())->links("pagination::bootstrap-4") }}
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+{{-- MODAL EDIT --}}
 @foreach($siswa as $s)
-<!-- Modal Edit -->
 <div class="modal fade" id="editSiswaModal{{ $s->id }}" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <form class="modal-content" method="POST" action="{{ route('admin.siswa.update', $s->id) }}">
@@ -129,7 +176,7 @@
 </div>
 @endforeach
 
-<!-- Modal Tambah -->
+{{-- MODAL TAMBAH --}}
 <div class="modal fade" id="createSiswaModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <form class="modal-content" method="POST" action="{{ route('admin.siswa.store') }}">
@@ -184,27 +231,27 @@
     </div>
 </div>
 
-<!-- SweetAlert2 -->
+{{-- SWEETALERT2 --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function confirmDelete(siswaId) {
-    Swal.fire({
-      title: 'Yakin ingin menghapus siswa ini?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Ya, Hapus'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/siswa/${siswaId}`;
-        form.innerHTML = '@csrf @method("DELETE")';
-        document.body.appendChild(form);
-        form.submit();
-      }
-    });
-  }
+        Swal.fire({
+            title: 'Yakin ingin menghapus siswa ini?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Hapus'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/admin/siswa/${siswaId}`;
+                form.innerHTML = '@csrf @method("DELETE")';
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
 </script>
 @endsection

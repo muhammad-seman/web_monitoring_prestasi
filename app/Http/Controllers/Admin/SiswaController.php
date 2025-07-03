@@ -6,15 +6,28 @@ use App\Helpers\ActivityLogger;
 use App\Http\Controllers\Controller;
 use App\Models\Siswa;
 use App\Models\Kelas;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class SiswaController extends Controller
 {
-    // Tampilkan semua siswa
-    public function index()
+    public function index(Request $request)
     {
-        $siswa = Siswa::with('kelas')->paginate(10);
+        $query = Siswa::with('kelas');
+
+        if ($request->filled('kelas')) {
+            $query->where('id_kelas', $request->kelas);
+        }
+        if ($request->filled('jenis_kelamin')) {
+            $query->where('jenis_kelamin', $request->jenis_kelamin);
+        }
+        if ($request->filled('tahun_masuk')) {
+            $query->where('tahun_masuk', $request->tahun_masuk);
+        }
+
+        $siswa = $query->orderBy('nama')->paginate(10);
         $kelas = Kelas::pluck('nama_kelas', 'id');
+
         return view('admin.siswa.index', compact('siswa', 'kelas'));
     }
 
@@ -82,5 +95,26 @@ class SiswaController extends Controller
         );
 
         return redirect()->route('admin.siswa.index')->with('success', 'Siswa berhasil dihapus.');
+    }
+
+    public function cetak(Request $request)
+    {
+        $query = Siswa::with('kelas');
+
+        if ($request->filled('kelas')) {
+            $query->where('id_kelas', $request->kelas);
+        }
+        if ($request->filled('jenis_kelamin')) {
+            $query->where('jenis_kelamin', $request->jenis_kelamin);
+        }
+        if ($request->filled('tahun_masuk')) {
+            $query->where('tahun_masuk', $request->tahun_masuk);
+        }
+
+        $siswa = $query->orderBy('nama')->get();
+
+        // Buat view khusus cetak (tanpa modal dsb)
+        $pdf = PDF::loadView('admin.siswa.cetak', compact('siswa'));
+        return $pdf->stream('daftar-siswa.pdf');
     }
 }
