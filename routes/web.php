@@ -29,7 +29,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('kategori_prestasi', KategoriPrestasiController::class);
     Route::resource('tingkat_penghargaan', TingkatPenghargaanController::class);
     Route::resource('ekstrakurikuler', EkstrakurikulerController::class);
-    Route::resource('prestasi_siswa', PrestasiSiswaController::class);
+    Route::resource('prestasi_siswa', PrestasiSiswaController::class)->except('show');
+
+    Route::get('prestasi_siswa/cetak', [PrestasiSiswaController::class, 'cetak'])->name('prestasi_siswa.cetak');
 });
 
 // Jika nanti role 'kepala', 'pegawai', dll tinggal tambahkan group serupa:

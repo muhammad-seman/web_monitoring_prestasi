@@ -7,6 +7,8 @@
   <title>@yield('title')</title>
   <link rel="shortcut icon" type="image/png" href="{{ asset('assets/images/logos/favicon.png') }}" />
   <link rel="stylesheet" href="{{ asset('assets/css/styles.min.css') }}" />
+  <!-- Font Awesome CDN -->
+  {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-papm6kAMPx/+qvOB0fOkH1ZZ1xd6QbaO5jM90+hCbGyF/F7fs/3Gzdh0dX8GZFODdgNpTiFqouBZfyqCk41Z1w==" crossorigin="anonymous" referrerpolicy="no-referrer" /> --}}
 </head>
 
 <body>

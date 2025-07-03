@@ -11,13 +11,30 @@ use App\Models\TingkatPenghargaan;
 use App\Models\Ekstrakurikuler;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Carbon;
 
 class PrestasiSiswaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $prestasi = PrestasiSiswa::with(['siswa', 'kategori', 'tingkat', 'ekskul', 'creator', 'validator'])->orderByDesc('created_at')->paginate(10);
+        $query = PrestasiSiswa::with(['siswa', 'kategori', 'tingkat', 'ekskul', 'creator', 'validator'])
+            ->orderByDesc('created_at');
+
+        // FILTER KATEGORI
+        if ($request->filled('kategori')) {
+            $query->where('id_kategori_prestasi', $request->kategori);
+        }
+        // FILTER RANGE TANGGAL
+        if ($request->filled('from')) {
+            $query->whereDate('tanggal_prestasi', '>=', $request->from);
+        }
+        if ($request->filled('to')) {
+            $query->whereDate('tanggal_prestasi', '<=', $request->to);
+        }
+
+        $prestasi = $query->paginate(10)->appends($request->except('page')); // biar pagination tetap bawa filter
+
         $siswa    = Siswa::pluck('nama', 'id');
         $kategori = KategoriPrestasi::pluck('nama_kategori', 'id');
         $tingkat  = TingkatPenghargaan::pluck('tingkat', 'id');
@@ -119,5 +136,25 @@ class PrestasiSiswaController extends Controller
         $prestasi_siswa->delete();
         ActivityLogger::log('delete', 'prestasi_siswa', 'Hapus prestasi: ' . $desc);
         return redirect()->route('admin.prestasi_siswa.index')->with('success', 'Prestasi siswa berhasil dihapus.');
+    }
+
+    public function cetak(Request $request)
+    {
+        $query = PrestasiSiswa::with(['siswa', 'kategori', 'tingkat']);
+
+        if ($request->filled('kategori')) {
+            $query->where('id_kategori_prestasi', $request->kategori);
+        }
+        if ($request->filled('from')) {
+            $query->whereDate('tanggal_prestasi', '>=', $request->from);
+        }
+        if ($request->filled('to')) {
+            $query->whereDate('tanggal_prestasi', '<=', $request->to);
+        }
+
+        $data['prestasi'] = $query->orderByDesc('tanggal_prestasi')->get();
+
+        $pdf = Pdf::loadView('admin.prestasi_siswa.cetak', $data);
+        return $pdf->stream('rekap-prestasi-' . now()->format('Ymd-His') . '.pdf');
     }
 }

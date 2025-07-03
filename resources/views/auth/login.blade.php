@@ -24,10 +24,10 @@
               <div class="card-body">
                 <a href="/" class="text-nowrap logo-img text-center d-block py-3 w-100">
                   {{-- Ganti dengan logo sistem akademik Anda --}}
-                  <img src="{{ asset('assets/images/logos/logo.svg') }}" width="180"
-                    alt="Logo Sistem Informasi Akademik">
+                  {{-- <img src="{{ asset('assets/images/logos/logo.svg') }}" width="180"
+                    alt="Logo Sistem Informasi Akademik"> --}}
                 </a>
-                <p class="text-center">Sistem Informasi Akademik MAPK NU Haruyan</p>
+                <h1 class="text-center mb-4">Login</h1>
 
                 {{-- Form Login --}}
                 <form method="POST" action="{{ route('login') }}">

@@ -1,14 +1,41 @@
 @extends('layouts.app')
 @section('title', 'Prestasi Siswa')
+
 @section('content')
+<!-- Iconify CDN -->
+<script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
 <div class="row">
     <div class="col-lg-12">
         <div class="card w-100">
             <div class="card-body">
-                <div class="d-md-flex align-items-center justify-content-between">
+                <!-- Filter & Action -->
+                <div class="d-md-flex align-items-center justify-content-between mb-3">
                     <h4 class="card-title">Prestasi Siswa</h4>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPrestasiModal">Tambah
-                        Prestasi</button>
+                    <div class="d-flex gap-2">
+                        <form method="GET" class="d-flex align-items-center gap-2">
+                            <select name="kategori" class="form-select">
+                                <option value="">Semua Kategori</option>
+                                @foreach($kategori as $id => $nama_kategori)
+                                <option value="{{ $id }}" {{ request('kategori')==$id ? 'selected' : '' }}>
+                                    {{ $nama_kategori }}
+                                </option>
+                                @endforeach
+                            </select>
+                            <input type="date" name="from" class="form-control" value="{{ request('from') }}">
+                            <span class="mx-1">s/d</span>
+                            <input type="date" name="to" class="form-control" value="{{ request('to') }}">
+                            <button type="submit" class="btn btn-secondary" title="Terapkan Filter">
+                                <span class="iconify" data-icon="mdi:filter-variant" data-width="20" data-height="20"></span>
+                            </button>
+                        </form>
+                        <a href="{{ route('admin.prestasi_siswa.cetak', request()->all()) }}" class="btn btn-success"
+                            target="_blank" title="Cetak PDF">
+                            <span class="iconify" data-icon="mdi:printer" data-width="20" data-height="20"></span>
+                        </a>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPrestasiModal">
+                            <span class="iconify" data-icon="mdi:plus" data-width="20" data-height="20"></span>
+                        </button>
+                    </div>
                 </div>
 
                 @if ($errors->any())
@@ -54,11 +81,17 @@
                                 </td>
                                 <td>
                                     <button class="btn btn-info btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#detailPrestasiModal{{ $p->id }}">Detail</button>
+                                        data-bs-target="#detailPrestasiModal{{ $p->id }}" title="Detail">
+                                        <span class="iconify" data-icon="mdi:eye" data-width="18" data-height="18"></span>
+                                    </button>
                                     <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#editPrestasiModal{{ $p->id }}">Edit</button>
-                                    <button class="btn btn-danger btn-sm"
-                                        onclick="confirmDelete({{ $p->id }})">Hapus</button>
+                                        data-bs-target="#editPrestasiModal{{ $p->id }}" title="Edit">
+                                        <span class="iconify" data-icon="mdi:pencil" data-width="18" data-height="18"></span>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="confirmDelete({{ $p->id }})"
+                                        title="Hapus">
+                                        <span class="iconify" data-icon="mdi:trash-can" data-width="18" data-height="18"></span>
+                                    </button>
                                 </td>
                             </tr>
                             @endforeach
@@ -119,7 +152,9 @@
                         <th>Dokumen</th>
                         <td>
                             @if($p->dokumen_url)
-                            <a href="{{ asset($p->dokumen_url) }}" target="_blank">Lihat Dokumen</a>
+                            <a href="{{ asset($p->dokumen_url) }}" target="_blank">
+                                <span class="iconify text-danger" data-icon="mdi:file-pdf-box" data-width="20" data-height="20"></span> Lihat Dokumen
+                            </a>
                             @else
                             -
                             @endif
@@ -240,7 +275,9 @@
                     <input type="file" name="dokumen_file" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
                     @if(isset($p) && $p->dokumen_url)
                     <div class="mt-2">
-                        <a href="{{ asset($p->dokumen_url) }}" target="_blank">Lihat Dokumen Lama</a>
+                        <a href="{{ asset($p->dokumen_url) }}" target="_blank">
+                            <span class="iconify text-danger" data-icon="mdi:file-pdf-box" data-width="20" data-height="20"></span> Lihat Dokumen Lama
+                        </a>
                     </div>
                     @endif
                 </div>
@@ -276,7 +313,8 @@
 <!-- Modal Tambah -->
 <div class="modal fade" id="createPrestasiModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <form class="modal-content" method="POST" enctype="multipart/form-data" action="{{ route('admin.prestasi_siswa.store') }}">
+        <form class="modal-content" method="POST" enctype="multipart/form-data"
+            action="{{ route('admin.prestasi_siswa.store') }}">
             @csrf
             <div class="modal-header">
                 <h5 class="modal-title">Tambah Prestasi</h5>
@@ -338,11 +376,7 @@
                 <div class="mb-3">
                     <label>Dokumen Sertifikat (PDF/JPG/PNG, opsional)</label>
                     <input type="file" name="dokumen_file" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
-                    @if(isset($p) && $p->dokumen_url)
-                    <div class="mt-2">
-                        <a href="{{ asset($p->dokumen_url) }}" target="_blank">Lihat Dokumen Lama</a>
-                    </div>
-                    @endif
+                    {{-- Tidak perlu tampilkan "Lihat Dokumen Lama" di modal tambah --}}
                 </div>
                 <div class="mb-3">
                     <label>Status</label>
