@@ -18,6 +18,7 @@ class User extends Authenticatable
         'password',
         'role',
         'status',
+        'siswa_id',
     ];
     /**
      * Relasi ke activity logs
@@ -25,6 +26,18 @@ class User extends Authenticatable
     public function activityLogs()
     {
         return $this->hasMany(ActivityLog::class);
+    }
+
+    // Relasi ke siswa (jika user adalah siswa)
+    public function siswa()
+    {
+        return $this->belongsTo(Siswa::class, 'siswa_id');
+    }
+
+    // Relasi ke anak-anak (jika user adalah wali/orang tua)
+    public function anak()
+    {
+        return $this->hasMany(Siswa::class, 'wali_id');
     }
 
     // Tambahkan relasi lain jika perlu (siswa, wali, dll)

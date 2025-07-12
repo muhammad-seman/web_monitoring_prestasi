@@ -16,4 +16,10 @@ class Ekstrakurikuler extends Model
     {
         return $this->hasMany(SiswaEkskul::class, 'id_ekskul');
     }
+
+    // Relasi ke siswa (melalui siswa_ekskul)
+    public function siswa()
+    {
+        return $this->belongsToMany(Siswa::class, 'siswa_ekskul', 'id_ekskul', 'id_siswa');
+    }
 }

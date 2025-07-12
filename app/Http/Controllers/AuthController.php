@@ -40,10 +40,17 @@ class AuthController extends Controller
             switch ($user->role) {
                 case 'admin':
                     return redirect()->route('admin.dashboard')->with('success', 'Selamat datang di Dashboard Admin');
-                case 'kepala':
-                    return redirect()->route('kepala.dashboard')->with('success', 'Selamat datang di Dashboard Kepala');
-                case 'pegawai':
-                    return redirect()->route('pegawai.dashboard')->with('success', 'Selamat datang di Dashboard Pegawai');
+                case 'guru':
+                    return redirect()->route('guru.dashboard')->with('success', 'Selamat datang di Dashboard Guru');
+                case 'siswa':
+                    // Pastikan route siswa.dashboard sudah ada
+                    return redirect()->route('siswa.dashboard')->with('success', 'Selamat datang di Dashboard Siswa');
+                case 'wali':
+                    // Pastikan route wali.dashboard sudah ada
+                    return redirect()->route('wali.dashboard')->with('success', 'Selamat datang di Dashboard Wali');
+                case 'kepala_sekolah':
+                    // Pastikan route kepala_sekolah.dashboard sudah ada
+                    return redirect()->route('kepala_sekolah.dashboard')->with('success', 'Selamat datang di Dashboard Kepala Sekolah');
                 default:
                     Auth::logout();
                     return redirect()->route('login')->withErrors(['login' => 'Role tidak dikenal.']);

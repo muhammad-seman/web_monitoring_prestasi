@@ -34,13 +34,13 @@ class PrestasiSiswa extends Model
     }
 
     // Relasi ke kategori prestasi
-    public function kategori()
+    public function kategoriPrestasi()
     {
         return $this->belongsTo(KategoriPrestasi::class, 'id_kategori_prestasi');
     }
 
     // Relasi ke tingkat penghargaan
-    public function tingkat()
+    public function tingkatPenghargaan()
     {
         return $this->belongsTo(TingkatPenghargaan::class, 'id_tingkat_penghargaan');
     }
@@ -56,8 +56,20 @@ class PrestasiSiswa extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+    
     public function validator()
     {
         return $this->belongsTo(User::class, 'validated_by');
+    }
+
+    // Alias untuk backward compatibility
+    public function kategori()
+    {
+        return $this->kategoriPrestasi();
+    }
+
+    public function tingkat()
+    {
+        return $this->tingkatPenghargaan();
     }
 }

@@ -7,14 +7,17 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Siswa;
 
 class UserController extends Controller
 {
     // Tampilkan semua user
     public function index()
     {
-        $users = User::paginate(10);
-        return view('admin.users.index', compact('users'));
+        $users = User::with(['siswa', 'anak'])->paginate(10);
+        $siswa = Siswa::doesntHave('user')->pluck('nama', 'id');
+        $siswaWali = Siswa::doesntHave('wali')->pluck('nama', 'id');
+        return view('admin.users.index', compact('users', 'siswa', 'siswaWali'));
     }
 
     // Show form tambah user
@@ -64,6 +67,9 @@ class UserController extends Controller
             'email'    => 'required|email|unique:users,email,' . $user->id,
             'role'     => 'required|in:admin,kepala_sekolah,guru,siswa,wali',
             'status'   => 'required|in:active,inactive',
+            'siswa_id' => 'nullable|exists:siswa,id',
+            'anak_ids' => 'nullable|array',
+            'anak_ids.*' => 'exists:siswa,id',
         ]);
 
         if ($request->filled('password')) {
@@ -71,6 +77,18 @@ class UserController extends Controller
         }
 
         $user->update($validated);
+
+        // Handle assign anak untuk wali
+        if ($user->role === 'wali' && $request->has('anak_ids')) {
+            // Reset semua anak yang sebelumnya di-assign ke wali ini
+            Siswa::where('wali_id', $user->id)->update(['wali_id' => null]);
+            
+            // Assign anak-anak yang dipilih
+            if (!empty($request->anak_ids)) {
+                Siswa::whereIn('id', $request->anak_ids)->update(['wali_id' => $user->id]);
+            }
+        }
+
         ActivityLogger::log('update', 'user', 'Update user: ' . $user->nama);
         return redirect()->route('admin.users.index')->with('success', 'User berhasil diupdate.');
     }

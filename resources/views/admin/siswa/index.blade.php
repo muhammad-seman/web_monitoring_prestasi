@@ -29,7 +29,7 @@
                             </select>
                             <input type="text" name="tahun_masuk" class="form-control" style="min-width:110px"
                                 placeholder="Tahun Masuk" value="{{ request('tahun_masuk') }}">
-                            <button type="submit" class="btn btn-secondary" title="Terapkan Filter">
+                            <button type="submit" class="btn btn-primary">
                                 <span class="iconify" data-icon="mdi:filter-variant" data-width="20"></span>
                             </button>
                         </form>
@@ -71,6 +71,7 @@
                                 <th>Tanggal Lahir</th>
                                 <th>Alamat</th>
                                 <th>Tahun Masuk</th>
+                                <th>Wali</th>
                                 <th>Aksi</th>
                             </tr>
                             </thead>
@@ -94,6 +95,13 @@
                                     <td>{{ $s->alamat ?? '-' }}</td>
                                     <td>{{ $s->tahun_masuk ?? '-' }}</td>
                                     <td>
+                                        @if($s->wali)
+                                            <span class="badge bg-info">{{ $s->wali->nama }}</span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
                                         <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
                                             data-bs-target="#editSiswaModal{{ $s->id }}" title="Edit">
                                             <span class="iconify" data-icon="mdi:pencil" data-width="18"></span>
@@ -106,7 +114,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="9" class="text-center">Tidak ada data siswa.</td>
+                                    <td colspan="10" class="text-center">Tidak ada data siswa.</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -166,6 +174,15 @@
                     <label>Tahun Masuk</label>
                     <input type="text" name="tahun_masuk" class="form-control" value="{{ $s->tahun_masuk }}">
                 </div>
+                <div class="mb-3">
+                    <label>Wali Murid</label>
+                    <select name="wali_id" class="form-control">
+                        <option value="">- Pilih Wali Murid -</option>
+                        @foreach($wali as $id => $nama)
+                        <option value="{{ $id }}" {{ $s->wali_id == $id ? 'selected' : '' }}>{{ $nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -221,6 +238,15 @@
                 <div class="mb-3">
                     <label>Tahun Masuk</label>
                     <input type="text" name="tahun_masuk" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label>Wali Murid</label>
+                    <select name="wali_id" class="form-control">
+                        <option value="">- Pilih Wali Murid -</option>
+                        @foreach($wali as $id => $nama)
+                        <option value="{{ $id }}">{{ $nama }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
             <div class="modal-footer">

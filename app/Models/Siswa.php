@@ -17,6 +17,8 @@ class Siswa extends Model
         'id_kelas',
         'alamat',
         'tahun_masuk',
+        'no_hp',
+        'wali_id',
     ];
 
     // Relasi ke kelas
@@ -29,5 +31,23 @@ class Siswa extends Model
     public function user()
     {
         return $this->hasOne(User::class, 'siswa_id');
+    }
+
+    // Relasi ke wali murid (orang tua)
+    public function wali()
+    {
+        return $this->belongsTo(User::class, 'wali_id');
+    }
+
+    // Relasi ke ekstrakurikuler (melalui siswa_ekskul)
+    public function ekstrakurikuler()
+    {
+        return $this->belongsToMany(Ekstrakurikuler::class, 'siswa_ekskul', 'id_siswa', 'id_ekskul');
+    }
+
+    // Relasi ke prestasi
+    public function prestasi()
+    {
+        return $this->hasMany(PrestasiSiswa::class, 'id_siswa');
     }
 }

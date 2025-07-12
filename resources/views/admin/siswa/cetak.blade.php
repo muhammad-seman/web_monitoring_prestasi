@@ -37,6 +37,7 @@
                 <th>Tanggal Lahir</th>
                 <th>Alamat</th>
                 <th>Tahun Masuk</th>
+                <th>Wali</th>
             </tr>
         </thead>
         <tbody>
@@ -50,6 +51,7 @@
                 <td>{{ $s->tanggal_lahir ? \Carbon\Carbon::parse($s->tanggal_lahir)->format('d-m-Y') : '-' }}</td>
                 <td>{{ $s->alamat }}</td>
                 <td>{{ $s->tahun_masuk }}</td>
+                <td>{{ $s->wali->nama ?? '-' }}</td>
             </tr>
             @endforeach
         </tbody>

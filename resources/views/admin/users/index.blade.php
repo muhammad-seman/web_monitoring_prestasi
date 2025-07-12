@@ -31,6 +31,8 @@
                 <th>Email</th>
                 <th>Role</th>
                 <th>Status</th>
+                <th>Siswa</th>
+                <th>Wali/Anak</th>
                 <th>Aksi</th>
               </tr>
             </thead>
@@ -60,6 +62,28 @@
                   <span class="badge bg-{{ $user->status == 'active' ? 'success' : 'danger' }}">
                     {{ ucfirst($user->status) }}
                   </span>
+                </td>
+                <td>
+                  @if($user->role === 'siswa')
+                    {{ $user->siswa->nama ?? '-' }}
+                  @else
+                    -
+                  @endif
+                </td>
+                <td>
+                  @if($user->role === 'wali')
+                    @if($user->anak->count() > 0)
+                      <ul class="list-unstyled mb-0">
+                        @foreach($user->anak as $anak)
+                          <li><small class="badge bg-light text-dark">{{ $anak->nama }}</small></li>
+                        @endforeach
+                      </ul>
+                    @else
+                      <span class="text-muted">-</span>
+                    @endif
+                  @else
+                    -
+                  @endif
                 </td>
                 <td>
                   <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
@@ -108,7 +132,7 @@
             <option value="kepala_sekolah" {{ $user->role == 'kepala_sekolah' ? 'selected' : '' }}>Kepala Sekolah</option>
             <option value="guru" {{ $user->role == 'guru' ? 'selected' : '' }}>Guru</option>
             <option value="siswa" {{ $user->role == 'siswa' ? 'selected' : '' }}>Siswa</option>
-            <option value="wali" {{ $user->role == 'wali' ? 'selected' : '' }}>Wali</option>
+            <option value="wali" {{ $user->role == 'wali' ? 'selected' : '' }}>Wali Murid</option>
           </select>
         </div>
         <div class="mb-3">
@@ -118,6 +142,36 @@
             <option value="inactive" {{ $user->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
           </select>
         </div>
+        @if($user->role === 'siswa')
+        <div class="mb-3">
+          <label>Assign ke Siswa</label>
+          <select name="siswa_id" class="form-control">
+            <option value="">- Pilih Siswa -</option>
+            @foreach($siswa as $id => $nama)
+              <option value="{{ $id }}" {{ $user->siswa_id == $id ? 'selected' : '' }}>{{ $nama }}</option>
+            @endforeach
+            @if($user->siswa && !isset($siswa[$user->siswa->id]))
+              <option value="{{ $user->siswa->id }}" selected>{{ $user->siswa->nama }}</option>
+            @endif
+          </select>
+        </div>
+        @endif
+        @if($user->role === 'wali')
+        <div class="mb-3">
+          <label>Assign Anak (Wali Murid)</label>
+          <select name="anak_ids[]" class="form-control" multiple>
+            @foreach($siswaWali as $id => $nama)
+              <option value="{{ $id }}" {{ $user->anak->contains('id', $id) ? 'selected' : '' }}>{{ $nama }}</option>
+            @endforeach
+            @foreach($user->anak as $anak)
+              @if(!isset($siswaWali[$anak->id]))
+                <option value="{{ $anak->id }}" selected>{{ $anak->nama }}</option>
+              @endif
+            @endforeach
+          </select>
+          <small class="form-text text-muted">Pilih siswa yang akan di-assign sebagai anak dari wali ini. Gunakan Ctrl/Cmd untuk memilih multiple.</small>
+        </div>
+        @endif
         <div class="mb-3">
           <label>Password (isi jika ingin mengubah)</label>
           <input type="password" name="password" class="form-control" autocomplete="new-password">
@@ -169,7 +223,7 @@
             <option value="kepala_sekolah">Kepala Sekolah</option>
             <option value="guru">Guru</option>
             <option value="siswa">Siswa</option>
-            <option value="wali">Wali</option>
+            <option value="wali">Wali Murid</option>
           </select>
         </div>
         <div class="mb-3">
