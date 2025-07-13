@@ -59,3 +59,85 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+# Web Monitoring Prestasi
+
+Sistem monitoring prestasi siswa berbasis web dengan role-based access control.
+
+## Fitur Dashboard Admin
+
+Dashboard admin menyediakan monitoring komprehensif untuk seluruh sistem dengan fitur-fitur berikut:
+
+### 📊 Statistik Utama
+- **Total Siswa**: Jumlah siswa terdaftar dalam sistem
+- **Total Prestasi**: Jumlah prestasi dengan breakdown status (tervalidasi, pending, ditolak)
+- **Total Kelas**: Jumlah kelas dengan rata-rata siswa per kelas
+- **Total Ekstrakurikuler**: Jumlah ekskul aktif dengan total anggota
+
+### 👥 Statistik Pengguna
+- Breakdown pengguna berdasarkan role:
+  - Guru
+  - Wali Kelas
+  - Kepala Sekolah
+  - Admin
+
+### 🏆 Status Prestasi
+- Prestasi Tervalidasi
+- Prestasi Pending
+- Prestasi Ditolak
+
+### 📈 Grafik dan Visualisasi
+- **Tren Prestasi**: Grafik area 6 bulan terakhir
+- **Prestasi per Kategori**: Donut chart distribusi kategori prestasi
+
+### 📋 Tabel Ranking
+- **Top 5 Kelas**: Kelas dengan prestasi terbanyak
+- **Top 5 Ekstrakurikuler**: Ekskul dengan anggota terbanyak
+
+### ⏰ Aktivitas Terbaru
+- Timeline aktivitas sistem 10 terbaru
+- Prestasi terbaru yang ditambahkan
+
+### 🎨 Fitur UI/UX
+- Responsive design untuk semua device
+- Loading states dan empty states
+- Error handling yang graceful
+- Interactive charts dengan ApexCharts
+- Modern card-based layout
+
+## Teknologi yang Digunakan
+
+- **Backend**: Laravel 10
+- **Frontend**: Bootstrap 5, Tabler Icons
+- **Charts**: ApexCharts
+- **Database**: MySQL/PostgreSQL
+
+## Struktur Data Dashboard
+
+Dashboard admin mengakses data dari model-model berikut:
+- `User` - Data pengguna dan role
+- `Siswa` - Data siswa
+- `PrestasiSiswa` - Data prestasi dengan relasi
+- `Kelas` - Data kelas dan wali kelas
+- `Ekstrakurikuler` - Data ekskul dan anggota
+- `ActivityLog` - Log aktivitas sistem
+- `KategoriPrestasi` - Kategori prestasi
+- `TingkatPenghargaan` - Tingkat penghargaan
+
+## Akses Dashboard
+
+Dashboard admin dapat diakses oleh user dengan role `admin` melalui route:
+```
+/admin/dashboard
+```
+
+## Screenshot Dashboard
+
+Dashboard admin menampilkan:
+1. **Row 1**: 4 card statistik utama dengan icon dan warna berbeda
+2. **Row 2**: 2 card statistik pengguna dan status prestasi
+3. **Row 3**: Grafik tren prestasi dan distribusi kategori
+4. **Row 4**: Tabel ranking kelas dan ekstrakurikuler
+5. **Row 5**: Timeline aktivitas dan prestasi terbaru
+
+Semua komponen responsive dan menangani kasus data kosong dengan graceful fallback.
