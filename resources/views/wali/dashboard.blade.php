@@ -102,6 +102,82 @@
   </div>
 </div>
 
+<!-- Row Grafik Prestasi Anak -->
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title">Tren Prestasi Anak (6 Bulan Terakhir)</h5>
+      </div>
+      <div class="card-body">
+        <div id="prestasi-anak-chart" style="height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title">Prestasi Anak per Kategori</h5>
+      </div>
+      <div class="card-body">
+        <div id="kategori-anak-chart" style="height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- CDN ApexCharts dan script chart -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.41.0/dist/apexcharts.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Area Chart Prestasi Anak per Bulan
+    var prestasiAnakOptions = {
+        series: [{
+            name: 'Prestasi',
+            data: @json($prestasiPerBulan->pluck('total')->toArray() ?: [0])
+        }],
+        chart: {
+            type: 'area',
+            height: 300,
+            toolbar: { show: false }
+        },
+        dataLabels: { enabled: false },
+        stroke: { curve: 'smooth', width: 2 },
+        colors: ['#7367F0'],
+        fill: {
+            type: 'gradient',
+            gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.2, stops: [0, 90, 100] }
+        },
+        xaxis: {
+            categories: @json($prestasiPerBulan->pluck('bulan')->toArray() ?: ['-']),
+            labels: {
+                formatter: function(value) {
+                    if (!value || value === '-') return '-';
+                    return new Date(value + '-01').toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+                }
+            }
+        },
+        yaxis: {
+            labels: { formatter: function(value) { return Math.round(value); } }
+        },
+        tooltip: { x: { format: 'MMM yyyy' } }
+    };
+    var prestasiAnakChart = new ApexCharts(document.querySelector("#prestasi-anak-chart"), prestasiAnakOptions);
+    prestasiAnakChart.render();
+
+    // Donut Chart Prestasi Anak per Kategori
+    var kategoriAnakOptions = {
+        series: @json($prestasiPerKategori->pluck('total')->toArray() ?: [0]),
+        chart: { type: 'donut', height: 300 },
+        labels: @json($prestasiPerKategori->pluck('kategori')->toArray() ?: ['-']),
+        colors: ['#7367F0', '#28C76F', '#EA5455', '#FF9F43', '#1E9FF2'],
+        plotOptions: { pie: { donut: { size: '65%' } } },
+        legend: { position: 'bottom' }
+    };
+    var kategoriAnakChart = new ApexCharts(document.querySelector("#kategori-anak-chart"), kategoriAnakOptions);
+    kategoriAnakChart.render();
+});
+</script>
+
 <!-- Row 2 -->
 <div class="row">
   <div class="col-lg-8">

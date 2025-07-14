@@ -30,7 +30,7 @@
                     </div>
                     <div class="mb-3">
                         <label>Jenis Kelamin</label>
-                        <input type="text" class="form-control" value="{{ $siswa->jenis_kelamin == 'L' ? 'Laki-laki' : ($siswa->jenis_kelamin == 'P' ? 'Perempuan' : '-') }}" disabled>
+                        <input type="text" class="form-control" value="{{ $siswa && $siswa->jenis_kelamin == 'L' ? 'Laki-laki' : ($siswa && $siswa->jenis_kelamin == 'P' ? 'Perempuan' : '-') }}" disabled>
                     </div>
                     <div class="mb-3">
                         <label>Tanggal Lahir</label>
