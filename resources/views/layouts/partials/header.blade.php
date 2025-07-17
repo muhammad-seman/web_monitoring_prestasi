@@ -11,6 +11,58 @@
 
     <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
       <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+        @if(auth()->user()->role === 'admin')
+          <li class="nav-item dropdown me-3">
+            <a class="nav-link position-relative" href="#" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="ti ti-bell fs-4"></i>
+              @php
+                $pendingCount = \App\Models\PrestasiSiswa::where('status', 'menunggu_validasi')->count();
+              @endphp
+              @if($pendingCount > 0)
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  {{ $pendingCount }}
+                </span>
+              @endif
+            </a>
+            <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="notifDropdown" style="width: 300px;">
+              <div class="message-body">
+                <h6 class="fw-semibold fs-4 py-2 px-3 mb-0">Prestasi Menunggu Validasi</h6>
+                <div class="dropdown-divider"></div>
+                @php
+                  $pendingPrestasi = \App\Models\PrestasiSiswa::with('siswa')
+                    ->where('status', 'menunggu_validasi')
+                    ->latest()
+                    ->take(5)
+                    ->get();
+                @endphp
+                @forelse($pendingPrestasi as $prestasi)
+                  <a href="{{ route('admin.prestasi_siswa.index') }}" class="d-flex align-items-center dropdown-item py-2">
+                    <div class="flex-shrink-0">
+                      <div class="bg-primary-subtle rounded-circle p-2">
+                        <i class="ti ti-trophy text-primary"></i>
+                      </div>
+                    </div>
+                    <div class="ms-2 flex-grow-1">
+                      <h6 class="mb-0 fs-3">{{ Str::limit($prestasi->nama_prestasi, 25) }}</h6>
+                      <span class="fs-2 text-muted">{{ $prestasi->siswa->nama ?? 'Siswa' }}</span>
+                    </div>
+                  </a>
+                @empty
+                  <div class="px-3 py-2 text-center text-muted">
+                    <i class="ti ti-bell-off fs-6"></i>
+                    <p class="mb-0 fs-3">Tidak ada prestasi menunggu validasi</p>
+                  </div>
+                @endforelse
+                @if($pendingCount > 5)
+                  <div class="dropdown-divider"></div>
+                  <a href="{{ route('admin.prestasi_siswa.index') }}" class="d-block text-center py-2 text-primary">
+                    Lihat {{ $pendingCount - 5 }} lainnya
+                  </a>
+                @endif
+              </div>
+            </div>
+          </li>
+        @endif
         <li class="nav-item dropdown">
           <a class="nav-link" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown" aria-expanded="false">
             <img src="{{ asset('assets/images/profile/user-1.jpg') }}" alt="Foto Profil" width="35" height="35"
