@@ -233,6 +233,24 @@
             <option value="inactive">Inactive</option>
           </select>
         </div>
+        <div class="mb-3" id="siswaAssignDiv" style="display: none;">
+          <label>Assign ke Siswa</label>
+          <select name="siswa_id" class="form-control">
+            <option value="">- Pilih Siswa -</option>
+            @foreach($siswa as $id => $nama)
+              <option value="{{ $id }}">{{ $nama }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="mb-3" id="anakAssignDiv" style="display: none;">
+          <label>Assign Anak (Wali Murid)</label>
+          <select name="anak_ids[]" class="form-control" multiple>
+            @foreach($siswaWali as $id => $nama)
+              <option value="{{ $id }}">{{ $nama }}</option>
+            @endforeach
+          </select>
+          <small class="text-muted">Tahan Ctrl untuk memilih beberapa anak sekaligus</small>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -264,5 +282,32 @@
       }
     });
   }
+
+  // Function to show/hide assignment fields based on role
+  function toggleAssignmentFields(roleSelect) {
+    const siswaDiv = document.getElementById('siswaAssignDiv');
+    const anakDiv = document.getElementById('anakAssignDiv');
+    
+    // Hide both divs initially
+    siswaDiv.style.display = 'none';
+    anakDiv.style.display = 'none';
+    
+    // Show appropriate div based on role
+    if (roleSelect.value === 'siswa') {
+      siswaDiv.style.display = 'block';
+    } else if (roleSelect.value === 'wali') {
+      anakDiv.style.display = 'block';
+    }
+  }
+
+  // Add event listener to role select in create modal
+  document.addEventListener('DOMContentLoaded', function() {
+    const createRoleSelect = document.querySelector('#createUserModal select[name="role"]');
+    if (createRoleSelect) {
+      createRoleSelect.addEventListener('change', function() {
+        toggleAssignmentFields(this);
+      });
+    }
+  });
 </script>
 @endsection

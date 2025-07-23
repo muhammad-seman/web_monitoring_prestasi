@@ -40,5 +40,16 @@ class User extends Authenticatable
         return $this->hasMany(Siswa::class, 'wali_id');
     }
 
+    // Relasi ke notifikasi
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    public function unreadNotifications()
+    {
+        return $this->notifications()->where('is_read', false);
+    }
+
     // Tambahkan relasi lain jika perlu (siswa, wali, dll)
 }

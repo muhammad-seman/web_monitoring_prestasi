@@ -101,12 +101,6 @@
                                         data-bs-target="#editPrestasiModal{{ $p->id }}" title="Edit">
                                         <span class="iconify" data-icon="mdi:pencil" data-width="18" data-height="18"></span>
                                     </button>
-                                    @if($p->status == 'menunggu_validasi')
-                                    <button class="btn btn-success btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#validasiPrestasiModal{{ $p->id }}" title="Validasi">
-                                        <span class="iconify" data-icon="mdi:check-circle" data-width="18" data-height="18"></span>
-                                    </button>
-                                    @endif
                                     @if(!$p->dokumen_url)
                                     <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
                                         data-bs-target="#uploadDokumenModal{{ $p->id }}" title="Upload Dokumen">
@@ -312,8 +306,6 @@
                         <option value="draft" {{ $p->status == 'draft' ? 'selected' : '' }}>Draft</option>
                         <option value="menunggu_validasi" {{ $p->status == 'menunggu_validasi' ? 'selected' : ''
                             }}>Menunggu Validasi</option>
-                        <option value="diterima" {{ $p->status == 'diterima' ? 'selected' : '' }}>Diterima</option>
-                        <option value="ditolak" {{ $p->status == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                     </select>
                 </div>
                 <div class="mb-3">
@@ -335,41 +327,6 @@
 </div>
 @endforeach
 
-@foreach($prestasi as $p)
-<!-- Modal Validasi -->
-<div class="modal fade" id="validasiPrestasiModal{{ $p->id }}" tabindex="-1">
-    <div class="modal-dialog">
-        <form class="modal-content" method="POST" action="{{ route('guru.prestasi_siswa.validasi', $p->id) }}">
-            @csrf
-            <div class="modal-header">
-                <h5 class="modal-title">Validasi Prestasi</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Prestasi:</strong> {{ $p->nama_prestasi }}</p>
-                <p><strong>Siswa:</strong> {{ $p->siswa->nama ?? '-' }}</p>
-                
-                <div class="mb-3">
-                    <label>Status Validasi</label>
-                    <select name="status" class="form-control" required onchange="toggleAlasanTolak(this.value)">
-                        <option value="">- Pilih Status -</option>
-                        <option value="diterima">Diterima</option>
-                        <option value="ditolak">Ditolak</option>
-                    </select>
-                </div>
-                <div class="mb-3" id="alasanTolakDiv" style="display: none;">
-                    <label>Alasan Tolak</label>
-                    <textarea name="alasan_tolak" class="form-control" rows="3" placeholder="Masukkan alasan penolakan..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-primary">Validasi</button>
-            </div>
-        </form>
-    </div>
-</div>
-@endforeach
 
 @foreach($prestasi as $p)
 <!-- Modal Upload Dokumen -->
@@ -472,8 +429,6 @@
                     <select name="status" class="form-control" required>
                         <option value="draft">Draft</option>
                         <option value="menunggu_validasi">Menunggu Validasi</option>
-                        <option value="diterima">Diterima</option>
-                        <option value="ditolak">Ditolak</option>
                     </select>
                 </div>
                 <div class="mb-3">

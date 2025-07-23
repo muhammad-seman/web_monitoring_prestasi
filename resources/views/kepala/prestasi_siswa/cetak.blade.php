@@ -1,33 +1,19 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Rekap Prestasi Siswa - Kepala Sekolah</title>
-    <style>
-        body { font-family: Arial, sans-serif; font-size: 12px; margin: 20px; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        .filter-info { margin-bottom: 15px; font-size: 11px; color: #666; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #222; padding: 6px; text-align: left; font-size: 11px; }
-        th { background: #f2f2f2; font-weight: bold; }
-        .no-data { text-align: center; padding: 20px; font-style: italic; }
-        .status-badge { padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; }
-        .status-draft { background-color: #6c757d; color: white; }
-        .status-menunggu_validasi { background-color: #ffc107; color: black; }
-        .status-diterima { background-color: #28a745; color: white; }
-        .status-ditolak { background-color: #dc3545; color: white; }
-        @media print { body { margin: 0; } .no-print { display: none; } }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h2>REKAP PRESTASI SISWA</h2>
-        <p>Sistem Monitoring Prestasi Siswa</p>
-        <p>Tanggal Cetak: {{ date('d-m-Y H:i') }}</p>
+@extends('layouts.letterhead', [
+    'title' => 'Rekap Prestasi Siswa - Kepala Sekolah',
+    'date' => 'Barabai, ' . date('d F Y'),
+    'letterType' => 'Kepala Sekolah',
+    'signatureName' => 'Kepala Sekolah',
+    'signatureTitle' => Auth::user()->name ?? 'Kepala Sekolah'
+])
+
+@section('content')
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h2 style="margin: 0; font-size: 16px; font-weight: bold;">REKAP PRESTASI SISWA</h2>
+        <p style="margin: 5px 0; font-size: 12px;">Sistem Monitoring Prestasi Siswa</p>
+        <p style="margin: 5px 0; font-size: 12px;">Tanggal Cetak: {{ date('d-m-Y H:i') }}</p>
     </div>
 
-    <div class="filter-info">
+    <div style="margin-bottom: 15px; font-size: 11px; color: #666;">
         @if(request('kelas_id') || request('kategori_id') || request('tingkat_id') || request('status'))
             <strong>Filter yang diterapkan:</strong><br>
             @if(request('kelas_id'))
@@ -71,7 +57,16 @@
                 <td>{{ $p->penyelenggara ?? '-' }}</td>
                 <td>{{ $p->tanggal_prestasi ? \Carbon\Carbon::parse($p->tanggal_prestasi)->format('d-m-Y') : '-' }}</td>
                 <td>
-                    <span class="status-badge status-{{ $p->status }}">
+                    @php
+                        $statusStyle = match($p->status) {
+                            'draft' => 'background-color: #6c757d; color: white;',
+                            'menunggu_validasi' => 'background-color: #ffc107; color: black;',
+                            'diterima' => 'background-color: #28a745; color: white;',
+                            'ditolak' => 'background-color: #dc3545; color: white;',
+                            default => 'background-color: #6c757d; color: white;'
+                        };
+                    @endphp
+                    <span style="padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; {{ $statusStyle }}">
                         {{ ucwords(str_replace('_', ' ', $p->status)) }}
                     </span>
                 </td>
@@ -84,8 +79,8 @@
         </tbody>
     </table>
 
-    <div style="margin-top: 30px; font-size: 10px; color: #666;">
+    
+    <div style="margin-top: 30px; font-size: 10px; color: #666; text-align: center;">
         <p><em>Dicetak oleh: {{ Auth::user()->name ?? 'Kepala Sekolah' }} pada {{ date('d-m-Y H:i:s') }}</em></p>
     </div>
-</body>
-</html> 
+@endsection 

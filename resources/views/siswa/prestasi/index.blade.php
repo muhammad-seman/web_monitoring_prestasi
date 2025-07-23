@@ -5,7 +5,12 @@
     <div class="col-lg-12">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title mb-3">Daftar Prestasi Saya</h4>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="card-title mb-0">Daftar Prestasi Saya</h4>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahPrestasiModal">
+                        <i class="ti ti-plus"></i> Tambah Prestasi
+                    </button>
+                </div>
                 <!-- Filter -->
                 <form method="GET" class="row mb-3 g-2">
                     <div class="col-md-2">
@@ -83,6 +88,18 @@
                                 </td>
                                 <td>
                                     <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#detailPrestasiModal{{ $p->id }}">Detail</button>
+                                    @if($p->status == 'draft')
+                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editPrestasiModal{{ $p->id }}">Edit</button>
+                                    <form action="{{ route('siswa.prestasi.submit', $p->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin mengajukan prestasi ini untuk validasi?')">
+                                        @csrf
+                                        <button type="submit" class="btn btn-primary btn-sm">Ajukan</button>
+                                    </form>
+                                    <form action="{{ route('siswa.prestasi.destroy', $p->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus prestasi ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                                    </form>
+                                    @endif
                                     <a href="{{ route('siswa.prestasi.cetakSurat', $p->id) }}" class="btn btn-success btn-sm" target="_blank">Cetak Surat</a>
                                 </td>
                             </tr>
@@ -149,6 +166,16 @@
                         </td>
                     </tr>
                     <tr>
+                        <th>Surat Tugas</th>
+                        <td>
+                            @if($p->surat_tugas_url)
+                            <a href="{{ asset($p->surat_tugas_url) }}" target="_blank">Lihat Surat Tugas</a>
+                            @else
+                            -
+                            @endif
+                        </td>
+                    </tr>
+                    <tr>
                         <th>Status</th>
                         <td>
                             <span class="badge bg-{{ $p->status == 'diterima' ? 'success' : ($p->status == 'ditolak' ? 'danger' : 'warning') }}">
@@ -173,4 +200,214 @@
     </div>
 </div>
 @endforeach
+
+<!-- Modal Tambah Prestasi -->
+<div class="modal fade" id="tambahPrestasiModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Prestasi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('siswa.prestasi.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nama Prestasi <span class="text-danger">*</span></label>
+                                <input type="text" name="nama_prestasi" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Kategori <span class="text-danger">*</span></label>
+                                <select name="id_kategori_prestasi" class="form-control" required>
+                                    <option value="">Pilih Kategori</option>
+                                    @foreach($kategori as $id => $nama)
+                                        <option value="{{ $id }}">{{ $nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tingkat <span class="text-danger">*</span></label>
+                                <select name="id_tingkat_penghargaan" class="form-control" required>
+                                    <option value="">Pilih Tingkat</option>
+                                    @foreach($tingkat as $id => $nama)
+                                        <option value="{{ $id }}">{{ $nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Ekstrakurikuler</label>
+                                <select name="id_ekskul" class="form-control">
+                                    <option value="">Pilih Ekskul</option>
+                                    @foreach($ekskul as $id => $nama)
+                                        <option value="{{ $id }}">{{ $nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Penyelenggara</label>
+                                <input type="text" name="penyelenggara" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tanggal Prestasi</label>
+                                <input type="date" name="tanggal_prestasi" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Rata-rata Nilai</label>
+                                <input type="number" name="rata_rata_nilai" class="form-control" step="0.01" min="0" max="100">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Dokumen Sertifikat</label>
+                                <input type="file" name="dokumen_file" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                                <small class="text-muted">Format: PDF, JPG, PNG. Max: 2MB</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Surat Tugas</label>
+                                <input type="file" name="surat_tugas_file" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                                <small class="text-muted">Format: PDF, JPG, PNG. Max: 2MB</small>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Keterangan</label>
+                                <textarea name="keterangan" class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@foreach($prestasi as $p)
+<!-- Modal Edit Prestasi -->
+<div class="modal fade" id="editPrestasiModal{{ $p->id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Prestasi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('siswa.prestasi.update', $p->id) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nama Prestasi <span class="text-danger">*</span></label>
+                                <input type="text" name="nama_prestasi" class="form-control" value="{{ $p->nama_prestasi }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Kategori <span class="text-danger">*</span></label>
+                                <select name="id_kategori_prestasi" class="form-control" required>
+                                    <option value="">Pilih Kategori</option>
+                                    @foreach($kategori as $id => $nama)
+                                        <option value="{{ $id }}" {{ $p->id_kategori_prestasi == $id ? 'selected' : '' }}>{{ $nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tingkat <span class="text-danger">*</span></label>
+                                <select name="id_tingkat_penghargaan" class="form-control" required>
+                                    <option value="">Pilih Tingkat</option>
+                                    @foreach($tingkat as $id => $nama)
+                                        <option value="{{ $id }}" {{ $p->id_tingkat_penghargaan == $id ? 'selected' : '' }}>{{ $nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Ekstrakurikuler</label>
+                                <select name="id_ekskul" class="form-control">
+                                    <option value="">Pilih Ekskul</option>
+                                    @foreach($ekskul as $id => $nama)
+                                        <option value="{{ $id }}" {{ $p->id_ekskul == $id ? 'selected' : '' }}>{{ $nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Penyelenggara</label>
+                                <input type="text" name="penyelenggara" class="form-control" value="{{ $p->penyelenggara }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tanggal Prestasi</label>
+                                <input type="date" name="tanggal_prestasi" class="form-control" value="{{ $p->tanggal_prestasi }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Rata-rata Nilai</label>
+                                <input type="number" name="rata_rata_nilai" class="form-control" step="0.01" min="0" max="100" value="{{ $p->rata_rata_nilai }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Dokumen Sertifikat</label>
+                                <input type="file" name="dokumen_file" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                                <small class="text-muted">Format: PDF, JPG, PNG. Max: 2MB</small>
+                                @if($p->dokumen_url)
+                                    <br><small class="text-info">File saat ini: <a href="{{ asset($p->dokumen_url) }}" target="_blank">Lihat</a></small>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Surat Tugas</label>
+                                <input type="file" name="surat_tugas_file" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                                <small class="text-muted">Format: PDF, JPG, PNG. Max: 2MB</small>
+                                @if($p->surat_tugas_url)
+                                    <br><small class="text-info">File saat ini: <a href="{{ asset($p->surat_tugas_url) }}" target="_blank">Lihat</a></small>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Keterangan</label>
+                                <textarea name="keterangan" class="form-control" rows="3">{{ $p->keterangan }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endforeach
+
 @endsection 

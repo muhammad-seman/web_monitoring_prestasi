@@ -81,7 +81,7 @@ class PrestasiSiswaController extends Controller
             'tanggal_prestasi'        => 'required|date',
             'keterangan'              => 'nullable|string|max:255',
             'dokumen_file'            => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'status'                  => 'required|in:draft,menunggu_validasi,diterima,ditolak',
+            'status'                  => 'required|in:draft,menunggu_validasi',
             'rata_rata_nilai'         => 'nullable|numeric',
             'alasan_tolak'            => 'nullable|string|max:255',
         ]);
@@ -101,12 +101,6 @@ class PrestasiSiswaController extends Controller
         }
 
         $validated['created_by'] = $user->id;
-
-        // Set validasi jika status diterima/ditolak
-        if (in_array($validated['status'], ['diterima', 'ditolak'])) {
-            $validated['validated_by'] = $user->id;
-            $validated['validated_at'] = Carbon::now();
-        }
 
         $prestasi = PrestasiSiswa::create($validated);
 
@@ -155,7 +149,7 @@ class PrestasiSiswaController extends Controller
             'tanggal_prestasi'        => 'required|date',
             'keterangan'              => 'nullable|string|max:255',
             'dokumen_file'            => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'status'                  => 'required|in:draft,menunggu_validasi,diterima,ditolak',
+            'status'                  => 'required|in:draft,menunggu_validasi',
             'rata_rata_nilai'         => 'nullable|numeric',
             'alasan_tolak'            => 'nullable|string|max:255',
         ]);
@@ -179,48 +173,12 @@ class PrestasiSiswaController extends Controller
             $validated['dokumen_url'] = 'storage/' . $path;
         }
 
-        // Update validasi hanya jika status diterima/ditolak
-        if (in_array($validated['status'], ['diterima', 'ditolak'])) {
-            $validated['validated_by'] = $user->id;
-            $validated['validated_at'] = Carbon::now();
-        }
-
         $prestasi_siswa->update($validated);
 
         ActivityLogger::log('update', 'prestasi_siswa', 'Guru update prestasi: ' . $prestasi_siswa->nama_prestasi . ' oleh ' . ($prestasi_siswa->siswa->nama ?? '-'));
         return redirect()->route('guru.prestasi_siswa.index')->with('success', 'Prestasi siswa berhasil diupdate.');
     }
 
-    /**
-     * Validasi prestasi (approve/reject).
-     */
-    public function validasi(Request $request, PrestasiSiswa $prestasi_siswa)
-    {
-        $user = Auth::user();
-        $kelasGuru = Kelas::where('id_wali_kelas', $user->id)->pluck('id');
-        
-        // Validasi akses
-        if (!$kelasGuru->contains($prestasi_siswa->siswa->id_kelas)) {
-            abort(403, 'Anda tidak memiliki akses ke prestasi siswa ini.');
-        }
-
-        $validated = $request->validate([
-            'status' => 'required|in:diterima,ditolak',
-            'alasan_tolak' => 'nullable|string|max:255|required_if:status,ditolak',
-        ]);
-
-        $prestasi_siswa->update([
-            'status' => $validated['status'],
-            'validated_by' => $user->id,
-            'validated_at' => Carbon::now(),
-            'alasan_tolak' => $validated['alasan_tolak'] ?? null,
-        ]);
-
-        $statusText = $validated['status'] == 'diterima' ? 'diterima' : 'ditolak';
-        ActivityLogger::log('update', 'prestasi_siswa', 'Guru validasi prestasi: ' . $prestasi_siswa->nama_prestasi . ' - ' . $statusText);
-        
-        return redirect()->route('guru.prestasi_siswa.index')->with('success', 'Prestasi siswa berhasil ' . $statusText . '.');
-    }
 
     /**
      * Upload dokumen bukti prestasi.

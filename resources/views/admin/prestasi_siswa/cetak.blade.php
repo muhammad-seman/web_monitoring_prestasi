@@ -1,49 +1,56 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Rekap Prestasi Siswa</title>
-    <style>
-        body { font-family: Arial, sans-serif; font-size: 12px;}
-        table { width: 100%; border-collapse: collapse; margin-top: 20px;}
-        th, td { border: 1px solid #222; padding: 4px; text-align: left; }
-        th { background: #eee; }
-        h3 { margin-bottom: 0; }
-    </style>
-</head>
-<body>
-    <h3>Rekap Prestasi Siswa</h3>
-    @if(request('kategori'))
-        <p>Kategori: <b>{{ $prestasi->first()->kategori->nama_kategori ?? '-' }}</b></p>
-    @endif
-    @if(request('from') && request('to'))
-        <p>Periode: <b>{{ request('from') }} s/d {{ request('to') }}</b></p>
-    @endif
+@extends('layouts.letterhead', [
+    'title' => 'Rekap Prestasi Siswa',
+    'date' => 'Barabai, ' . \Carbon\Carbon::now()->format('d F Y'),
+    'letterType' => 'Kepala Madrasah',
+    'signatureName' => 'Kepala Madrasah',
+    'signatureTitle' => 'Soneran'
+])
 
-    <table>
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Nama Siswa</th>
-                <th>Nama Prestasi</th>
-                <th>Kategori</th>
-                <th>Tingkat</th>
-                <th>Status</th>
-                <th>Tanggal</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($prestasi as $i => $p)
-            <tr>
-                <td>{{ $i + 1 }}</td>
-                <td>{{ $p->siswa->nama ?? '-' }}</td>
-                <td>{{ $p->nama_prestasi }}</td>
-                <td>{{ $p->kategori->nama_kategori ?? '-' }}</td>
-                <td>{{ $p->tingkat->tingkat ?? '-' }}</td>
-                <td>{{ ucwords(str_replace('_', ' ', $p->status)) }}</td>
-                <td>{{ $p->tanggal_prestasi ? \Carbon\Carbon::parse($p->tanggal_prestasi)->format('d-m-Y') : '-' }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-</body>
-</html>
+@section('content')
+<div style="text-align: center; margin-bottom: 20px;">
+    <h3 style="text-decoration: underline; font-size: 16px; margin-bottom: 20px;">REKAP PRESTASI SISWA</h3>
+</div>
+
+@if(request('kategori'))
+    <p style="margin-bottom: 10px;">Kategori: <strong>{{ $prestasi->first()->kategori->nama_kategori ?? '-' }}</strong></p>
+@endif
+@if(request('from') && request('to'))
+    <p style="margin-bottom: 10px;">Periode: <strong>{{ \Carbon\Carbon::parse(request('from'))->format('d F Y') }} s/d {{ \Carbon\Carbon::parse(request('to'))->format('d F Y') }}</strong></p>
+@endif
+
+<table>
+    <thead>
+        <tr>
+            <th style="width: 5%; text-align: center;">No</th>
+            <th style="width: 20%;">Nama Siswa</th>
+            <th style="width: 25%;">Nama Prestasi</th>
+            <th style="width: 15%;">Kategori</th>
+            <th style="width: 15%;">Tingkat</th>
+            <th style="width: 10%;">Status</th>
+            <th style="width: 10%;">Tanggal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse($prestasi as $i => $p)
+        <tr>
+            <td style="text-align: center;">{{ $i + 1 }}</td>
+            <td>{{ $p->siswa->nama ?? '-' }}</td>
+            <td>{{ $p->nama_prestasi }}</td>
+            <td>{{ $p->kategoriPrestasi->nama_kategori ?? '-' }}</td>
+            <td>{{ $p->tingkatPenghargaan->tingkat ?? '-' }}</td>
+            <td>{{ ucwords(str_replace('_', ' ', $p->status)) }}</td>
+            <td>{{ $p->tanggal_prestasi ? \Carbon\Carbon::parse($p->tanggal_prestasi)->format('d/m/Y') : '-' }}</td>
+        </tr>
+        @empty
+        <tr>
+            <td colspan="7" style="text-align: center; font-style: italic;">Tidak ada data prestasi</td>
+        </tr>
+        @endforelse
+    </tbody>
+</table>
+
+<p style="margin-top: 20px; font-size: 11px;">
+    <strong>Total Prestasi: {{ $prestasi->count() }} prestasi</strong><br>
+    Dicetak pada: {{ \Carbon\Carbon::now()->format('d F Y H:i:s') }}
+</p>
+@endsection

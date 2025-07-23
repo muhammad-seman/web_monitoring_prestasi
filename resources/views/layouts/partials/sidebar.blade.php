@@ -1,8 +1,12 @@
 <aside class="left-sidebar">
   <div>
     <div class="brand-logo d-flex align-items-center justify-content-between">
-      <a href="#" class="text-nowrap logo-img">
-        {{-- <img src="{{ asset('assets/images/logos/logo.svg') }}" alt="Logo" /> --}}
+      <a href="#" class="text-nowrap logo-img d-flex align-items-center text-decoration-none">
+        <img src="{{ asset('assets/images/logos/logo.png') }}" alt="Logo" style="max-height: 40px; width: auto; margin-right: 10px;" />
+        <div class="brand-text">
+          <h6 class="mb-0 text-dark fw-bold" style="font-size: 14px; line-height: 1.2;">SISTEM INFORMASI</h6>
+          <small class="text-muted" style="font-size: 11px;">Monitoring Prestasi</small>
+        </div>
       </a>
       <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
         <i class="ti ti-x fs-6"></i>

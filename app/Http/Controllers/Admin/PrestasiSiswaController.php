@@ -9,6 +9,7 @@ use App\Models\Siswa;
 use App\Models\KategoriPrestasi;
 use App\Models\TingkatPenghargaan;
 use App\Models\Ekstrakurikuler;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -124,7 +125,35 @@ class PrestasiSiswaController extends Controller
             $validated['validated_at'] = null;
         }
 
+        // Store old status for comparison
+        $oldStatus = $prestasi_siswa->status;
+        
         $prestasi_siswa->update($validated);
+
+        // Send notification to parent if status changed to accepted or rejected
+        if ($oldStatus !== $validated['status'] && in_array($validated['status'], ['diterima', 'ditolak']) && $prestasi_siswa->siswa->wali_id) {
+            $statusText = $validated['status'] === 'diterima' ? 'diterima' : 'ditolak';
+            $title = $validated['status'] === 'diterima' ? 'Prestasi Diterima' : 'Prestasi Ditolak';
+            $message = "Prestasi '{$prestasi_siswa->nama_prestasi}' anak Anda {$prestasi_siswa->siswa->nama} telah {$statusText}.";
+            
+            if ($validated['status'] === 'ditolak' && !empty($validated['alasan_tolak'])) {
+                $message .= " Alasan: {$validated['alasan_tolak']}";
+            }
+            
+            Notification::createForParent(
+                $prestasi_siswa->siswa->wali_id,
+                $title,
+                $message,
+                [
+                    'prestasi_id' => $prestasi_siswa->id,
+                    'siswa_id' => $prestasi_siswa->siswa->id,
+                    'siswa_nama' => $prestasi_siswa->siswa->nama,
+                    'prestasi_nama' => $prestasi_siswa->nama_prestasi,
+                    'action' => 'validated',
+                    'status' => $validated['status']
+                ]
+            );
+        }
 
         ActivityLogger::log('update', 'prestasi_siswa', 'Update prestasi: ' . $prestasi_siswa->nama_prestasi . ' oleh ' . ($prestasi_siswa->siswa->nama ?? '-'));
         return redirect()->route('admin.prestasi_siswa.index')->with('success', 'Prestasi siswa berhasil diupdate.');

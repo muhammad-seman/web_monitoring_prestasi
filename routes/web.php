@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\TingkatPenghargaanController;
 use App\Http\Controllers\Admin\SiswaEkskulController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\NotificationController;
 
 // Guru Controllers
 use App\Http\Controllers\Guru\DashboardController as GuruDashboardController;
@@ -46,6 +47,12 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Notification routes (for all authenticated users)
+Route::middleware(['auth'])->group(function () {
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::get('/notifications/count', [NotificationController::class, 'getCount'])->name('notifications.count');
+});
+
 // Admin only (prefix dan middleware)
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -79,8 +86,6 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     Route::get('prestasi_siswa/{prestasi_siswa}/edit', [GuruPrestasiSiswaController::class, 'edit'])->name('prestasi_siswa.edit');
     Route::put('prestasi_siswa/{prestasi_siswa}', [GuruPrestasiSiswaController::class, 'update'])->name('prestasi_siswa.update');
     // Route::get('prestasi_siswa/{prestasi_siswa}', [GuruPrestasiSiswaController::class, 'show'])->name('prestasi_siswa.show');
-    // Validasi (approve/reject)
-    Route::post('prestasi_siswa/{prestasi_siswa}/validasi', [GuruPrestasiSiswaController::class, 'validasi'])->name('prestasi_siswa.validasi');
     // Upload dokumen bukti
     Route::post('prestasi_siswa/{prestasi_siswa}/upload', [GuruPrestasiSiswaController::class, 'uploadDokumen'])->name('prestasi_siswa.upload');
     // Cetak rekap prestasi siswa di kelasnya
@@ -163,6 +168,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
     Route::put('prestasi/{prestasi}', [\App\Http\Controllers\Siswa\PrestasiController::class, 'update'])->name('prestasi.update');
     Route::delete('prestasi/{prestasi}', [\App\Http\Controllers\Siswa\PrestasiController::class, 'destroy'])->name('prestasi.destroy');
     Route::get('prestasi/{prestasi}/cetak', [\App\Http\Controllers\Siswa\PrestasiController::class, 'cetakSurat'])->name('prestasi.cetakSurat');
+    Route::post('prestasi/{prestasi}/submit', [\App\Http\Controllers\Siswa\PrestasiController::class, 'submit'])->name('prestasi.submit');
 
     // Dokumen Prestasi: Upload, hapus
     // Route::post('prestasi/{prestasi}/dokumen', [\App\Http\Controllers\Siswa\DokumenPrestasiController::class, 'store'])->name('prestasi.dokumen.store');

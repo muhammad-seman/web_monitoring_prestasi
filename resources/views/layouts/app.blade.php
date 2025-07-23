@@ -57,6 +57,55 @@
 
   <!-- solar icons -->
   <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+  
+  <!-- Notification functions -->
+  <script>
+    function markAsRead(notificationId) {
+      fetch(`/notifications/${notificationId}/read`, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Update the UI to show the notification as read
+          const notificationElement = document.querySelector(`[onclick="markAsRead(${notificationId})"]`);
+          if (notificationElement) {
+            notificationElement.classList.remove('bg-light');
+            const badge = notificationElement.querySelector('.badge');
+            if (badge) {
+              badge.remove();
+            }
+          }
+          
+          // Update notification count
+          updateNotificationCount();
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    }
+    
+    function updateNotificationCount() {
+      fetch('/notifications/count')
+        .then(response => response.json())
+        .then(data => {
+          const badge = document.querySelector('#waliNotifDropdown .badge');
+          if (data.count > 0) {
+            if (badge) {
+              badge.textContent = data.count;
+            }
+          } else {
+            if(badge) {
+              badge.remove();
+            }
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+  </script>
 </body>
 
 </html>

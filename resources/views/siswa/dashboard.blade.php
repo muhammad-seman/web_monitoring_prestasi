@@ -1,41 +1,136 @@
 @extends('layouts.app')
 @section('title', 'Dashboard Siswa')
 @section('content')
+
+<!-- Row 1 - Statistics Cards -->
 <div class="row">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title mb-3">Dashboard Siswa</h4>
-                <p>Selamat datang di dashboard! Di sini Anda dapat melihat ringkasan prestasi pribadi dan data diri Anda.</p>
-                <!-- Row Grafik Prestasi Pribadi -->
-                <div class="row">
-                    <div class="col-lg-8">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Tren Prestasi Pribadi (6 Bulan Terakhir)</h5>
-                            </div>
-                            <div class="card-body">
-                                <div id="prestasi-siswa-chart" style="height: 300px;"></div>
-                                @if($prestasiPerBulan->count() == 0)
-                                    <div class="text-center text-muted mt-2">Belum ada data tren prestasi</div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Prestasi per Kategori</h5>
-                            </div>
-                            <div class="card-body">
-                                <div id="kategori-siswa-chart" style="height: 300px;"></div>
-                                @if($prestasiPerKategori->count() == 0)
-                                    <div class="text-center text-muted mt-2">Belum ada data kategori prestasi</div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
+  <div class="col-lg-12">
+    <div class="row">
+      <div class="col-lg-3">
+        <div class="card overflow-hidden">
+          <div class="card-body p-4">
+            <h5 class="card-title mb-9 fw-semibold">Total Prestasi</h5>
+            <div class="row align-items-center">
+              <div class="col-8">
+                <h4 class="fw-semibold mb-3">{{ $total }}</h4>
+                <div class="d-flex align-items-center mb-3">
+                  <span class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-trophy text-success"></i>
+                  </span>
+                  <p class="text-dark me-1 fs-3 mb-0">Prestasi Saya</p>
                 </div>
+              </div>
+              <div class="col-4">
+                <div class="d-flex justify-content-center">
+                  <div id="breakup"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <div class="card overflow-hidden">
+          <div class="card-body p-4">
+            <h5 class="card-title mb-9 fw-semibold">Prestasi Diterima</h5>
+            <div class="row align-items-center">
+              <div class="col-8">
+                <h4 class="fw-semibold mb-3">{{ $diterima }}</h4>
+                <div class="d-flex align-items-center mb-3">
+                  <span class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-check text-success"></i>
+                  </span>
+                  <p class="text-dark me-1 fs-3 mb-0">Diterima</p>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="d-flex justify-content-center">
+                  <div id="breakup"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <div class="card overflow-hidden">
+          <div class="card-body p-4">
+            <h5 class="card-title mb-9 fw-semibold">Menunggu Validasi</h5>
+            <div class="row align-items-center">
+              <div class="col-8">
+                <h4 class="fw-semibold mb-3">{{ $pending }}</h4>
+                <div class="d-flex align-items-center mb-3">
+                  <span class="me-1 rounded-circle bg-light-warning round-20 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-clock text-warning"></i>
+                  </span>
+                  <p class="text-dark me-1 fs-3 mb-0">Menunggu</p>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="d-flex justify-content-center">
+                  <div id="breakup"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <div class="card overflow-hidden">
+          <div class="card-body p-4">
+            <h5 class="card-title mb-9 fw-semibold">Prestasi Ditolak</h5>
+            <div class="row align-items-center">
+              <div class="col-8">
+                <h4 class="fw-semibold mb-3">{{ $ditolak }}</h4>
+                <div class="d-flex align-items-center mb-3">
+                  <span class="me-1 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-x text-danger"></i>
+                  </span>
+                  <p class="text-dark me-1 fs-3 mb-0">Ditolak</p>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="d-flex justify-content-center">
+                  <div id="breakup"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Row Grafik Prestasi Pribadi -->
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title">Tren Prestasi Pribadi (6 Bulan Terakhir)</h5>
+      </div>
+      <div class="card-body">
+        <div id="prestasi-siswa-chart" style="height: 300px;"></div>
+        @if($prestasiPerBulan->count() == 0)
+          <div class="text-center text-muted mt-2">Belum ada data tren prestasi</div>
+        @endif
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title">Prestasi per Kategori</h5>
+      </div>
+      <div class="card-body">
+        <div id="kategori-siswa-chart" style="height: 300px;"></div>
+        @if($prestasiPerKategori->count() == 0)
+          <div class="text-center text-muted mt-2">Belum ada data kategori prestasi</div>
+        @endif
+      </div>
+    </div>
+  </div>
+</div>
                 <!-- CDN ApexCharts dan script chart -->
                 <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.41.0/dist/apexcharts.min.js"></script>
                 <script>
@@ -89,14 +184,12 @@
                     });
                 </script>
 
-                <!-- Row Prestasi Terbaru -->
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Prestasi Terbaru</h5>
-                            </div>
-                            <div class="card-body">
+<!-- Row 2 - Prestasi Terbaru -->
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title fw-semibold mb-4">Prestasi Terbaru</h5>
                                 <div class="table-responsive">
                                     <table class="table table-hover">
                                         <thead>
@@ -152,12 +245,9 @@
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+  </div>
 </div>
+
 @endsection 

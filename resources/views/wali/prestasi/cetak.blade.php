@@ -1,89 +1,20 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekap Prestasi Anak</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            line-height: 1.4;
-            margin: 0;
-            padding: 20px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .header p {
-            margin: 5px 0;
-            font-size: 12px;
-        }
-        .info-section {
-            margin-bottom: 20px;
-        }
-        .info-section h3 {
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            font-weight: bold;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 5px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-            font-size: 11px;
-        }
-        th {
-            background-color: #f5f5f5;
-            font-weight: bold;
-        }
-        .status-badge {
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-        .status-diterima { background-color: #d4edda; color: #155724; }
-        .status-menunggu { background-color: #fff3cd; color: #856404; }
-        .status-draft { background-color: #e2e3e5; color: #383d41; }
-        .status-ditolak { background-color: #f8d7da; color: #721c24; }
-        .footer {
-            margin-top: 30px;
-            text-align: right;
-            font-size: 11px;
-        }
-        .no-data {
-            text-align: center;
-            font-style: italic;
-            color: #666;
-            padding: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>REKAP PRESTASI ANAK</h1>
-        <p>Dicetak pada: {{ now()->format('d/m/Y H:i:s') }}</p>
-        <p>Oleh: {{ auth()->user()->name }} (Wali)</p>
+@extends('layouts.letterhead', [
+    'title' => 'Rekap Prestasi Anak - Wali',
+    'date' => 'Barabai, ' . date('d F Y'),
+    'letterType' => 'Wali Siswa',
+    'signatureName' => Auth::user()->name ?? 'Wali Siswa',
+    'signatureTitle' => 'Wali Siswa'
+])
+
+@section('content')
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="margin: 0; font-size: 16px; font-weight: bold;">REKAP PRESTASI ANAK</h1>
+        <p style="margin: 5px 0; font-size: 12px;">Dicetak pada: {{ now()->format('d/m/Y H:i:s') }}</p>
+        <p style="margin: 5px 0; font-size: 12px;">Oleh: {{ auth()->user()->name }} (Wali)</p>
     </div>
 
-    <div class="info-section">
-        <h3>Ringkasan Data</h3>
+    <div style="margin-bottom: 20px;">
+        <h3 style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Ringkasan Data</h3>
         <table style="width: 50%; border: none;">
             <tr>
                 <td style="border: none; padding: 2px;">Total Prestasi</td>
@@ -101,8 +32,8 @@
     </div>
 
     @if($prestasi->count() > 0)
-        <div class="info-section">
-            <h3>Detail Prestasi</h3>
+        <div style="margin-bottom: 20px;">
+            <h3 style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Detail Prestasi</h3>
             <table>
                 <thead>
                     <tr>
@@ -145,8 +76,15 @@
                                     'ditolak' => 'Ditolak',
                                     default => ucfirst($p->status)
                                 };
+                                $statusStyle = match($statusClass) {
+                                    'status-diterima' => 'background-color: #d4edda; color: #155724;',
+                                    'status-menunggu' => 'background-color: #fff3cd; color: #856404;',
+                                    'status-draft' => 'background-color: #e2e3e5; color: #383d41;',
+                                    'status-ditolak' => 'background-color: #f8d7da; color: #721c24;',
+                                    default => 'background-color: #e2e3e5; color: #383d41;'
+                                };
                             @endphp
-                            <span class="status-badge {{ $statusClass }}">{{ $statusText }}</span>
+                            <span style="padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; {{ $statusStyle }}">{{ $statusText }}</span>
                         </td>
                         <td>{{ \Carbon\Carbon::parse($p->tanggal_prestasi)->format('d/m/Y') }}</td>
                     </tr>
@@ -155,8 +93,8 @@
             </table>
         </div>
 
-        <div class="info-section">
-            <h3>Rekap per Anak</h3>
+        <div style="margin-bottom: 20px;">
+            <h3 style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Rekap per Anak</h3>
             @php
                 $anakGroup = $prestasi->groupBy('id_siswa');
             @endphp
@@ -200,8 +138,15 @@
                                     'ditolak' => 'Ditolak',
                                     default => ucfirst($p->status)
                                 };
+                                $statusStyle = match($statusClass) {
+                                    'status-diterima' => 'background-color: #d4edda; color: #155724;',
+                                    'status-menunggu' => 'background-color: #fff3cd; color: #856404;',
+                                    'status-draft' => 'background-color: #e2e3e5; color: #383d41;',
+                                    'status-ditolak' => 'background-color: #f8d7da; color: #721c24;',
+                                    default => 'background-color: #e2e3e5; color: #383d41;'
+                                };
                             @endphp
-                            <span class="status-badge {{ $statusClass }}">{{ $statusText }}</span>
+                            <span style="padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; {{ $statusStyle }}">{{ $statusText }}</span>
                         </td>
                     </tr>
                     @endforeach
@@ -209,14 +154,13 @@
             @endforeach
         </div>
     @else
-        <div class="no-data">
+        <div style="text-align: center; font-style: italic; color: #666; padding: 20px;">
             <p>Tidak ada data prestasi untuk ditampilkan</p>
         </div>
     @endif
 
-    <div class="footer">
+    <div style="margin-top: 30px; text-align: center; font-size: 11px;">
         <p>Dokumen ini dicetak secara otomatis oleh sistem</p>
         <p>Halaman 1 dari 1</p>
     </div>
-</body>
-</html> 
+@endsection

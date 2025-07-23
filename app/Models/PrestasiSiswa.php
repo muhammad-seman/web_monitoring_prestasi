@@ -19,6 +19,7 @@ class PrestasiSiswa extends Model
         'tanggal_prestasi',
         'keterangan',
         'dokumen_url',
+        'surat_tugas_url',
         'status',
         'rata_rata_nilai',
         'created_by',

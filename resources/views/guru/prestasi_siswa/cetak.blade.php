@@ -1,165 +1,105 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Rekap Prestasi Siswa - Guru</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            font-size: 12px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
-        }
-        .kelas-info {
-            margin-bottom: 15px;
-        }
-        .filter-info {
-            margin-bottom: 15px;
-            font-size: 11px;
-            color: #666;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-            font-size: 11px;
-        }
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-        .no-data {
-            text-align: center;
-            padding: 20px;
-            font-style: italic;
-        }
-        .status-badge {
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-        .status-draft { background-color: #6c757d; color: white; }
-        .status-menunggu { background-color: #ffc107; color: black; }
-        .status-diterima { background-color: #28a745; color: white; }
-        .status-ditolak { background-color: #dc3545; color: white; }
-        @media print {
-            body { margin: 0; }
-            .no-print { display: none; }
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h2>REKAP PRESTASI SISWA KELAS SAYA</h2>
-        <p>Sistem Monitoring Prestasi Siswa</p>
-        <p>Tanggal Cetak: {{ date('d-m-Y H:i') }}</p>
-    </div>
+@extends('layouts.letterhead', [
+    'title' => 'Rekap Prestasi Siswa - Guru',
+    'date' => 'Barabai, ' . \Carbon\Carbon::now()->format('d F Y'),
+    'letterType' => 'Wali Kelas',
+    'signatureName' => 'Wali Kelas',
+    'signatureTitle' => auth()->user()->nama ?? 'Guru'
+])
 
-    <div class="kelas-info">
-        @if(isset($kelas) && $kelas->count() > 0)
-            <strong>Kelas yang diampu:</strong>
-            @foreach($kelas as $kls)
-                {{ $kls->nama_kelas }}{{ !$loop->last ? ', ' : '' }}
-            @endforeach
-        @else
-            <strong>Kelas:</strong> Tidak ada kelas yang diampu
-        @endif
-    </div>
+@section('content')
+<div style="text-align: center; margin-bottom: 20px;">
+    <h3 style="text-decoration: underline; font-size: 16px; margin-bottom: 15px;">REKAP PRESTASI SISWA</h3>
+    <p style="font-size: 12px; margin-bottom: 10px;">Kelas yang Diampu</p>
+</div>
 
-    <div class="filter-info">
-        @if(request('kategori') || request('from') || request('to') || request('status'))
-            <strong>Filter yang diterapkan:</strong><br>
-            @if(request('kategori'))
-                • Kategori: {{ \App\Models\KategoriPrestasi::find(request('kategori'))->nama_kategori ?? '-' }}<br>
-            @endif
-            @if(request('from') || request('to'))
-                • Periode: {{ request('from') ? \Carbon\Carbon::parse(request('from'))->format('d-m-Y') : 'Awal' }} 
-                s/d {{ request('to') ? \Carbon\Carbon::parse(request('to'))->format('d-m-Y') : 'Akhir' }}<br>
-            @endif
-            @if(request('status'))
-                • Status: {{ ucwords(str_replace('_', ' ', request('status'))) }}<br>
-            @endif
-        @endif
-    </div>
+<div style="margin-bottom: 15px; font-size: 12px;">
+    @if(isset($kelas) && $kelas->count() > 0)
+        <strong>Kelas yang diampu:</strong>
+        @foreach($kelas as $kls)
+            {{ $kls->nama_kelas }}{{ !$loop->last ? ', ' : '' }}
+        @endforeach
+    @else
+        <strong>Kelas:</strong> Tidak ada kelas yang diampu
+    @endif
+</div>
 
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 30px;">#</th>
-                <th>Nama Siswa</th>
-                <th>Nama Prestasi</th>
-                <th>Kategori</th>
-                <th>Tingkat</th>
-                <th>Penyelenggara</th>
-                <th>Tanggal</th>
-                <th>Status</th>
-                <th>Nilai</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($prestasi as $i => $p)
-            <tr>
-                <td>{{ $i + 1 }}</td>
-                <td>{{ $p->siswa->nama ?? '-' }}</td>
-                <td>{{ $p->nama_prestasi }}</td>
-                <td>{{ $p->kategori->nama_kategori ?? '-' }}</td>
-                <td>{{ $p->tingkat->tingkat ?? '-' }}</td>
-                <td>{{ $p->penyelenggara }}</td>
-                <td>{{ $p->tanggal_prestasi ? \Carbon\Carbon::parse($p->tanggal_prestasi)->format('d-m-Y') : '-' }}</td>
-                <td>
-                    <span class="status-badge status-{{ str_replace('_', '', $p->status) }}">
-                        {{ ucwords(str_replace('_', ' ', $p->status)) }}
-                    </span>
-                </td>
-                <td>{{ $p->rata_rata_nilai ?? '-' }}</td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="9" class="no-data">Belum ada data prestasi siswa di kelas Anda.</td>
-            </tr>
-            @endforelse
-        </tbody>
+@if(request('kategori') || request('from') || request('to') || request('status'))
+<div style="margin-bottom: 15px; font-size: 11px;">
+    <strong>Filter yang diterapkan:</strong><br>
+    @if(request('kategori'))
+        • Kategori: {{ \App\Models\KategoriPrestasi::find(request('kategori'))->nama_kategori ?? '-' }}<br>
+    @endif
+    @if(request('from') || request('to'))
+        • Periode: {{ request('from') ? \Carbon\Carbon::parse(request('from'))->format('d F Y') : 'Awal' }} 
+        s/d {{ request('to') ? \Carbon\Carbon::parse(request('to'))->format('d F Y') : 'Akhir' }}<br>
+    @endif
+    @if(request('status'))
+        • Status: {{ ucwords(str_replace('_', ' ', request('status'))) }}<br>
+    @endif
+</div>
+@endif
+
+<table>
+    <thead>
+        <tr>
+            <th style="width: 4%; text-align: center;">No</th>
+            <th style="width: 15%;">Nama Siswa</th>
+            <th style="width: 20%;">Nama Prestasi</th>
+            <th style="width: 12%;">Kategori</th>
+            <th style="width: 10%;">Tingkat</th>
+            <th style="width: 13%;">Penyelenggara</th>
+            <th style="width: 10%;">Tanggal</th>
+            <th style="width: 8%;">Status</th>
+            <th style="width: 8%;">Nilai</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse($prestasi as $i => $p)
+        <tr>
+            <td style="text-align: center;">{{ $i + 1 }}</td>
+            <td>{{ $p->siswa->nama ?? '-' }}</td>
+            <td>{{ $p->nama_prestasi }}</td>
+            <td>{{ $p->kategoriPrestasi->nama_kategori ?? '-' }}</td>
+            <td>{{ $p->tingkatPenghargaan->tingkat ?? '-' }}</td>
+            <td style="font-size: 10px;">{{ $p->penyelenggara ?? '-' }}</td>
+            <td>{{ $p->tanggal_prestasi ? \Carbon\Carbon::parse($p->tanggal_prestasi)->format('d/m/Y') : '-' }}</td>
+            <td style="font-size: 10px;">{{ ucwords(str_replace('_', ' ', $p->status)) }}</td>
+            <td style="text-align: center;">{{ $p->rata_rata_nilai ?? '-' }}</td>
+        </tr>
+        @empty
+        <tr>
+            <td colspan="9" style="text-align: center; font-style: italic;">Belum ada data prestasi siswa di kelas Anda</td>
+        </tr>
+        @endforelse
+    </tbody>
+</table>
+
+<div style="margin-top: 20px; font-size: 11px;">
+    <table style="width: 50%; border: none;">
+        <tr>
+            <td style="border: none; padding: 2px;"><strong>Total Prestasi:</strong></td>
+            <td style="border: none; padding: 2px;">{{ $prestasi->count() }} prestasi</td>
+        </tr>
+        <tr>
+            <td style="border: none; padding: 2px;"><strong>Status Draft:</strong></td>
+            <td style="border: none; padding: 2px;">{{ $prestasi->where('status', 'draft')->count() }} prestasi</td>
+        </tr>
+        <tr>
+            <td style="border: none; padding: 2px;"><strong>Menunggu Validasi:</strong></td>
+            <td style="border: none; padding: 2px;">{{ $prestasi->where('status', 'menunggu_validasi')->count() }} prestasi</td>
+        </tr>
+        <tr>
+            <td style="border: none; padding: 2px;"><strong>Diterima:</strong></td>
+            <td style="border: none; padding: 2px;">{{ $prestasi->where('status', 'diterima')->count() }} prestasi</td>
+        </tr>
+        <tr>
+            <td style="border: none; padding: 2px;"><strong>Ditolak:</strong></td>
+            <td style="border: none; padding: 2px;">{{ $prestasi->where('status', 'ditolak')->count() }} prestasi</td>
+        </tr>
     </table>
+</div>
 
-    <div style="margin-top: 30px;">
-        <table style="width: auto; border: none;">
-            <tr>
-                <td style="border: none;"><strong>Total Prestasi:</strong></td>
-                <td style="border: none;">{{ $prestasi->count() }} prestasi</td>
-            </tr>
-            <tr>
-                <td style="border: none;"><strong>Status Draft:</strong></td>
-                <td style="border: none;">{{ $prestasi->where('status', 'draft')->count() }} prestasi</td>
-            </tr>
-            <tr>
-                <td style="border: none;"><strong>Menunggu Validasi:</strong></td>
-                <td style="border: none;">{{ $prestasi->where('status', 'menunggu_validasi')->count() }} prestasi</td>
-            </tr>
-            <tr>
-                <td style="border: none;"><strong>Diterima:</strong></td>
-                <td style="border: none;">{{ $prestasi->where('status', 'diterima')->count() }} prestasi</td>
-            </tr>
-            <tr>
-                <td style="border: none;"><strong>Ditolak:</strong></td>
-                <td style="border: none;">{{ $prestasi->where('status', 'ditolak')->count() }} prestasi</td>
-            </tr>
-        </table>
-    </div>
-
-    <div style="margin-top: 20px; font-size: 10px; color: #666;">
-        <p><em>Dicetak oleh: {{ Auth::user()->name ?? 'Guru' }} pada {{ date('d-m-Y H:i:s') }}</em></p>
-    </div>
-</body>
-</html> 
+<p style="margin-top: 15px; font-size: 11px;">
+    Dicetak pada: {{ \Carbon\Carbon::now()->format('d F Y H:i:s') }}
+</p>
+@endsection

@@ -36,11 +36,21 @@ class UserController extends Controller
             'password' => 'required|string|min:6|confirmed',
             'role'     => 'required|in:admin,kepala_sekolah,guru,siswa,wali',
             'status'   => 'required|in:active,inactive',
+            'siswa_id' => 'nullable|exists:siswa,id',
+            'anak_ids' => 'nullable|array',
+            'anak_ids.*' => 'exists:siswa,id',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
 
-        User::create($validated);
+        $user = User::create($validated);
+
+        // Handle assign anak untuk wali
+        if ($user->role === 'wali' && $request->has('anak_ids') && !empty($request->anak_ids)) {
+            // Assign anak-anak yang dipilih
+            Siswa::whereIn('id', $request->anak_ids)->update(['wali_id' => $user->id]);
+        }
+
         ActivityLogger::log('create', 'user', 'Tambah user: ' . $request->nama);
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambah.');
