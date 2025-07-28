@@ -100,7 +100,6 @@
                                         <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
                                     </form>
                                     @endif
-                                    <a href="{{ route('siswa.prestasi.cetakSurat', $p->id) }}" class="btn btn-success btn-sm" target="_blank">Cetak Surat</a>
                                 </td>
                             </tr>
                             @empty

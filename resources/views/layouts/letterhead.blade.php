@@ -214,6 +214,7 @@
     </div>
 
     <!-- TANDA TANGAN -->
+    @if(!isset($hideSignature) || !$hideSignature)
     <div class="signature-section">
         <div class="signature-box">
             <br><br>
@@ -222,5 +223,6 @@
             <div style="margin-top: 5px;">{{ $signatureTitle ?? 'Soneran' }}</div>
         </div>
     </div>
+    @endif
 </body>
 </html>

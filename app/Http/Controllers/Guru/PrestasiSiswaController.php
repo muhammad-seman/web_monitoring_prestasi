@@ -45,6 +45,10 @@ class PrestasiSiswaController extends Controller
         if ($request->filled('to')) {
             $query->whereDate('tanggal_prestasi', '<=', $request->to);
         }
+        // FILTER TINGKAT
+        if ($request->filled('tingkat')) {
+            $query->where('id_tingkat_penghargaan', $request->tingkat);
+        }
         // FILTER STATUS
         if ($request->filled('status')) {
             $query->where('status', $request->status);

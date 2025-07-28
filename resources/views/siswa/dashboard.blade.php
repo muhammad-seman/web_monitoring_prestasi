@@ -17,7 +17,7 @@
                   <span class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
                     <i class="ti ti-trophy text-success"></i>
                   </span>
-                  <p class="text-dark me-1 fs-3 mb-0">Prestasi Saya</p>
+                  <p class="text-dark me-1 fs-3 mb-0">Prestasi Sekolah</p>
                 </div>
               </div>
               <div class="col-4">
@@ -107,7 +107,7 @@
   <div class="col-lg-8">
     <div class="card">
       <div class="card-header">
-        <h5 class="card-title">Tren Prestasi Pribadi (6 Bulan Terakhir)</h5>
+        <h5 class="card-title">Tren Prestasi Sekolah (6 Bulan Terakhir)</h5>
       </div>
       <div class="card-body">
         <div id="prestasi-siswa-chart" style="height: 300px;"></div>
@@ -120,7 +120,7 @@
   <div class="col-lg-4">
     <div class="card">
       <div class="card-header">
-        <h5 class="card-title">Prestasi per Kategori</h5>
+        <h5 class="card-title">Prestasi Sekolah per Kategori</h5>
       </div>
       <div class="card-body">
         <div id="kategori-siswa-chart" style="height: 300px;"></div>
@@ -189,12 +189,12 @@
   <div class="col-lg-12">
     <div class="card">
       <div class="card-body">
-        <h5 class="card-title fw-semibold mb-4">Prestasi Terbaru</h5>
+        <h5 class="card-title fw-semibold mb-4">Prestasi Terbaru Sekolah</h5>
                                 <div class="table-responsive">
                                     <table class="table table-hover">
                                         <thead>
                                             <tr>
-                                                <th>Prestasi</th>
+                                                <th>Prestasi Siswa</th>
                                                 <th>Kategori</th>
                                                 <th>Tingkat</th>
                                                 <th>Status</th>

@@ -41,6 +41,7 @@ class SiswaController extends Controller
             'nama'           => 'required|string|max:100',
             'jenis_kelamin'  => 'required|in:L,P',
             'tanggal_lahir'  => 'nullable|date',
+            'tempat_lahir'   => 'nullable|string|max:100',
             'alamat'         => 'nullable|string|max:255',
             'id_kelas'       => 'required|exists:kelas,id',
             'tahun_masuk'    => 'nullable|string|max:9', // contoh: 2023/2024
@@ -67,6 +68,7 @@ class SiswaController extends Controller
             'nama'           => 'required|string|max:100',
             'jenis_kelamin'  => 'required|in:L,P',
             'tanggal_lahir'  => 'nullable|date',
+            'tempat_lahir'   => 'nullable|string|max:100',
             'alamat'         => 'nullable|string|max:255',
             'id_kelas'       => 'required|exists:kelas,id',
             'tahun_masuk'    => 'nullable|string|max:9',

@@ -21,6 +21,14 @@
                                 </option>
                                 @endforeach
                             </select>
+                            <select name="tingkat" class="form-select">
+                                <option value="">Semua Tingkat</option>
+                                @foreach($tingkat as $id => $nama_tingkat)
+                                <option value="{{ $id }}" {{ request('tingkat')==$id ? 'selected' : '' }}>
+                                    {{ $nama_tingkat }}
+                                </option>
+                                @endforeach
+                            </select>
                             <select name="status" class="form-select">
                                 <option value="">Semua Status</option>
                                 <option value="draft" {{ request('status')=='draft' ? 'selected' : '' }}>Draft</option>
@@ -301,14 +309,6 @@
                     @endif
                 </div>
                 <div class="mb-3">
-                    <label>Status</label>
-                    <select name="status" class="form-control" required>
-                        <option value="draft" {{ $p->status == 'draft' ? 'selected' : '' }}>Draft</option>
-                        <option value="menunggu_validasi" {{ $p->status == 'menunggu_validasi' ? 'selected' : ''
-                            }}>Menunggu Validasi</option>
-                    </select>
-                </div>
-                <div class="mb-3">
                     <label>Nilai Rata-rata (jika akademik)</label>
                     <input type="number" name="rata_rata_nilai" step="0.01" class="form-control"
                         value="{{ $p->rata_rata_nilai }}">
@@ -423,13 +423,6 @@
                 <div class="mb-3">
                     <label>Dokumen Sertifikat (PDF/JPG/PNG, opsional)</label>
                     <input type="file" name="dokumen_file" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
-                </div>
-                <div class="mb-3">
-                    <label>Status</label>
-                    <select name="status" class="form-control" required>
-                        <option value="draft">Draft</option>
-                        <option value="menunggu_validasi">Menunggu Validasi</option>
-                    </select>
                 </div>
                 <div class="mb-3">
                     <label>Nilai Rata-rata (jika akademik)</label>

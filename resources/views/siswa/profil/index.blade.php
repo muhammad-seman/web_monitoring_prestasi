@@ -33,6 +33,10 @@
                         <input type="text" class="form-control" value="{{ $siswa && $siswa->jenis_kelamin == 'L' ? 'Laki-laki' : ($siswa && $siswa->jenis_kelamin == 'P' ? 'Perempuan' : '-') }}" disabled>
                     </div>
                     <div class="mb-3">
+                        <label>Tempat Lahir</label>
+                        <input type="text" class="form-control" value="{{ $siswa->tempat_lahir ?? '-' }}" disabled>
+                    </div>
+                    <div class="mb-3">
                         <label>Tanggal Lahir</label>
                         <input type="text" class="form-control" value="{{ $siswa->tanggal_lahir ?? '-' }}" disabled>
                     </div>

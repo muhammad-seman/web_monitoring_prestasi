@@ -68,7 +68,7 @@
                                 <th>Nama</th>
                                 <th>Kelas</th>
                                 <th>Gender</th>
-                                <th>Tanggal Lahir</th>
+                                <th>Tanggal/Tempat Lahir</th>
                                 <th>Alamat</th>
                                 <th>Tahun Masuk</th>
                                 <th>Wali</th>
@@ -89,9 +89,13 @@
                                             {{ $s->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}
                                         </span>
                                     </td>
-                                    <td>{{ $s->tanggal_lahir ? \Carbon\Carbon::parse($s->tanggal_lahir)->format('d-m-Y')
-                                        :
-                                        '-' }}</td>
+                                    <td>
+                                        @if($s->tanggal_lahir || $s->tempat_lahir)
+                                            {{ $s->tempat_lahir ?? '-' }}, {{ $s->tanggal_lahir ? \Carbon\Carbon::parse($s->tanggal_lahir)->format('d-m-Y') : '-' }}
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
                                     <td>{{ $s->alamat ?? '-' }}</td>
                                     <td>{{ $s->tahun_masuk ?? '-' }}</td>
                                     <td>
@@ -163,6 +167,10 @@
                     </select>
                 </div>
                 <div class="mb-3">
+                    <label>Tempat Lahir</label>
+                    <input type="text" name="tempat_lahir" class="form-control" value="{{ $s->tempat_lahir }}">
+                </div>
+                <div class="mb-3">
                     <label>Tanggal Lahir</label>
                     <input type="date" name="tanggal_lahir" class="form-control" value="{{ $s->tanggal_lahir }}">
                 </div>
@@ -226,6 +234,10 @@
                         <option value="L">Laki-laki</option>
                         <option value="P">Perempuan</option>
                     </select>
+                </div>
+                <div class="mb-3">
+                    <label>Tempat Lahir</label>
+                    <input type="text" name="tempat_lahir" class="form-control">
                 </div>
                 <div class="mb-3">
                     <label>Tanggal Lahir</label>
