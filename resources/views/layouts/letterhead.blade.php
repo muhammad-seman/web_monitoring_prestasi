@@ -188,7 +188,7 @@
     <!-- KOP SURAT -->
     <div class="header">
         <div class="logo-section">
-            <img src="{{ public_path('assets/images/logos/logo.png') }}" alt="Logo Madrasah" class="logo">
+            <img src="{{ public_path('assets/images/logos/logo2.png') }}" alt="Logo Madrasah" class="logo">
         </div>
         
         <div class="kop-text">
