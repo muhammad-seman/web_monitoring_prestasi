@@ -85,7 +85,6 @@ class PrestasiSiswaController extends Controller
             'tanggal_prestasi'        => 'required|date',
             'keterangan'              => 'nullable|string|max:255',
             'dokumen_file'            => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'status'                  => 'required|in:draft,menunggu_validasi',
             'rata_rata_nilai'         => 'nullable|numeric',
             'alasan_tolak'            => 'nullable|string|max:255',
         ]);
@@ -153,7 +152,6 @@ class PrestasiSiswaController extends Controller
             'tanggal_prestasi'        => 'required|date',
             'keterangan'              => 'nullable|string|max:255',
             'dokumen_file'            => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'status'                  => 'required|in:draft,menunggu_validasi',
             'rata_rata_nilai'         => 'nullable|numeric',
             'alasan_tolak'            => 'nullable|string|max:255',
         ]);
