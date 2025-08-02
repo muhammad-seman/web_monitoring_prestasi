@@ -1,9 +1,8 @@
 @extends('layouts.letterhead', [
     'title' => 'Daftar Siswa',
-    'date' => 'Barabai, ' . \Carbon\Carbon::now()->format('d F Y'),
-    'letterType' => 'Kepala Madrasah',
-    'signatureName' => 'Kepala Madrasah',
-    'signatureTitle' => 'Soneran'
+    'date' => '',
+    'letterType' => '',
+    'hideSignature' => true
 ])
 
 @section('content')
@@ -46,8 +45,13 @@
     </tbody>
 </table>
 
-<p style="margin-top: 20px; font-size: 11px;">
-    <strong>Total Siswa: {{ $siswa->count() }} siswa</strong><br>
-    Dicetak pada: {{ \Carbon\Carbon::now()->format('d F Y H:i:s') }}
-</p>
+<!-- SIGNATURE SECTION -->
+<div style="margin-top: 50px; text-align: right; font-size: 12px;">
+    <div style="display: inline-block; text-align: left;">
+        <br><br>
+        <strong>Kepala Madrasah</strong><br>
+        <div style="border-bottom: 1px solid #000; width: 150px; margin: 60px 0 0;"></div>
+        <div style="margin-top: 5px;">Soneran</div>
+    </div>
+</div>
 @endsection

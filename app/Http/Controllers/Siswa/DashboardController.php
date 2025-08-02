@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Siswa;
+use App\Models\Kelas;
+use App\Models\Ekstrakurikuler;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -20,6 +22,9 @@ class DashboardController extends Controller
         $pending = $prestasi->where('status', 'menunggu_validasi')->count();
         $ditolak = $prestasi->where('status', 'ditolak')->count();
         $ekskulList = $siswa ? $siswa->ekstrakurikuler : collect();
+        
+        // Total prestasi semua siswa untuk percentage calculation
+        $totalPrestasi = \App\Models\PrestasiSiswa::count();
 
         // Grafik tren prestasi semua siswa per bulan (6 bulan terakhir)
         $prestasiPerBulan = \App\Models\PrestasiSiswa::selectRaw('DATE_FORMAT(tanggal_prestasi, "%Y-%m") as bulan, COUNT(*) as total')
@@ -40,6 +45,23 @@ class DashboardController extends Controller
                 ->limit(5)
                 ->get();
 
-        return view('siswa.dashboard', compact('siswa', 'total', 'diterima', 'pending', 'ditolak', 'ekskulList', 'prestasiPerBulan', 'prestasiPerKategori', 'prestasiTerbaru'));
+        // Top 5 Kelas dengan Prestasi Terbanyak
+        $topKelasPrestasi = Kelas::select('kelas.nama_kelas', DB::raw('count(prestasi_siswa.id) as total_prestasi'))
+            ->leftJoin('siswa', 'kelas.id', '=', 'siswa.id_kelas')
+            ->leftJoin('prestasi_siswa', 'siswa.id', '=', 'prestasi_siswa.id_siswa')
+            ->groupBy('kelas.id', 'kelas.nama_kelas')
+            ->orderBy('total_prestasi', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Top 5 Ekstrakurikuler dengan Prestasi Terbanyak
+        $topEkskulPrestasi = Ekstrakurikuler::select('ekstrakurikuler.nama', DB::raw('count(prestasi_siswa.id) as total_prestasi'))
+            ->leftJoin('prestasi_siswa', 'ekstrakurikuler.id', '=', 'prestasi_siswa.id_ekskul')
+            ->groupBy('ekstrakurikuler.id', 'ekstrakurikuler.nama')
+            ->orderBy('total_prestasi', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('siswa.dashboard', compact('siswa', 'total', 'diterima', 'pending', 'ditolak', 'ekskulList', 'prestasiPerBulan', 'prestasiPerKategori', 'prestasiTerbaru', 'topKelasPrestasi', 'topEkskulPrestasi', 'totalPrestasi'));
     }
 } 

@@ -250,4 +250,99 @@
   </div>
 </div>
 
+<!-- Top 5 Kelas dan Ekstrakurikuler -->
+<div class="row">
+  <div class="col-lg-6 d-flex align-items-stretch">
+    <div class="card w-100">
+      <div class="card-header">
+        <h5 class="card-title">Top 5 Kelas dengan Prestasi Terbanyak</h5>
+      </div>
+      <div class="card-body">
+        @if($topKelasPrestasi->count() > 0)
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Kelas</th>
+                  <th>Total Prestasi</th>
+                  <th>Persentase</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach($topKelasPrestasi as $kelas)
+                <tr>
+                  <td>{{ $kelas->nama_kelas }}</td>
+                  <td>{{ $kelas->total_prestasi }}</td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                        <div class="progress-bar" style="width: {{ $totalPrestasi > 0 ? ($kelas->total_prestasi / $totalPrestasi) * 100 : 0 }}%"></div>
+                      </div>
+                      <span class="text-muted small">
+                        {{ $totalPrestasi > 0 ? round(($kelas->total_prestasi / $totalPrestasi) * 100, 1) : 0 }}%
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+        @else
+          <div class="text-center text-muted">
+            <i class="ti ti-trophy-off fs-1 mb-3"></i>
+            <p>Belum ada data prestasi kelas</p>
+          </div>
+        @endif
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-6 d-flex align-items-stretch">
+    <div class="card w-100">
+      <div class="card-header">
+        <h5 class="card-title">Top 5 Ekstrakurikuler dengan Prestasi Terbanyak</h5>
+      </div>
+      <div class="card-body">
+        @if($topEkskulPrestasi->count() > 0)
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Ekstrakurikuler</th>
+                  <th>Total Prestasi</th>
+                  <th>Persentase</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach($topEkskulPrestasi as $ekskul)
+                <tr>
+                  <td>{{ $ekskul->nama }}</td>
+                  <td>{{ $ekskul->total_prestasi }}</td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                        <div class="progress-bar bg-info" style="width: {{ $totalPrestasi > 0 ? ($ekskul->total_prestasi / $totalPrestasi) * 100 : 0 }}%"></div>
+                      </div>
+                      <span class="text-muted small">
+                        {{ $totalPrestasi > 0 ? round(($ekskul->total_prestasi / $totalPrestasi) * 100, 1) : 0 }}%
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+        @else
+          <div class="text-center text-muted">
+            <i class="ti ti-users-group fs-1 mb-3"></i>
+            <p>Belum ada data prestasi ekstrakurikuler</p>
+          </div>
+        @endif
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection 

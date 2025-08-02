@@ -32,6 +32,9 @@
                                 <span class="iconify" data-icon="mdi:filter-variant" data-width="20" data-height="20"></span>
                             </button>
                         </form>
+                        <a href="{{ route('admin.siswa_ekskul.cetak', request()->all()) }}" class="btn btn-success" target="_blank" title="Cetak PDF">
+                            <span class="iconify" data-icon="mdi:printer" data-width="20" data-height="20"></span>
+                        </a>
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSiswaEkskulModal">
                             <span class="iconify" data-icon="mdi:plus" data-width="20" data-height="20"></span>
                         </button>

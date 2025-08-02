@@ -198,4 +198,40 @@ class PrestasiController extends Controller
 
         return redirect()->route('siswa.prestasi.index')->with('success', 'Prestasi berhasil diajukan untuk validasi');
     }
+
+    public function cetak(Request $request)
+    {
+        $user = Auth::user();
+        $siswa = $user->siswa;
+        $query = $siswa ? $siswa->prestasi()->with(['kategoriPrestasi', 'tingkatPenghargaan', 'ekskul']) : PrestasiSiswa::query();
+        
+        if ($request->filled('kategori')) {
+            $query->where('id_kategori_prestasi', $request->kategori);
+        }
+        if ($request->filled('tingkat')) {
+            $query->where('id_tingkat_penghargaan', $request->tingkat);
+        }
+        if ($request->filled('ekskul')) {
+            $query->where('id_ekskul', $request->ekskul);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('from')) {
+            $query->whereDate('tanggal_prestasi', '>=', $request->from);
+        }
+        if ($request->filled('to')) {
+            $query->whereDate('tanggal_prestasi', '<=', $request->to);
+        }
+
+        $prestasi = $query->orderByDesc('tanggal_prestasi')->get();
+        
+        // Group by tingkat penghargaan for better report structure
+        $prestasiByTingkat = $prestasi->groupBy(function($item) {
+            return $item->tingkatPenghargaan->tingkat ?? 'Tidak Ada Tingkat';
+        });
+
+        $pdf = Pdf::loadView('siswa.prestasi.cetak', compact('prestasi', 'prestasiByTingkat', 'siswa'));
+        return $pdf->stream('laporan-prestasi-siswa.pdf');
+    }
 } 

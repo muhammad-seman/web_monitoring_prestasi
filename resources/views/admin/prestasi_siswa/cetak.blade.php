@@ -11,7 +11,10 @@
 </div>
 
 @if(request('kategori'))
-    <p style="margin-bottom: 10px;">Kategori: <strong>{{ $prestasi->first()->kategori->nama_kategori ?? '-' }}</strong></p>
+    <p style="margin-bottom: 10px;">Kategori: <strong>{{ $prestasi->first()->kategoriPrestasi->nama_kategori ?? '-' }}</strong></p>
+@endif
+@if(request('tingkat'))
+    <p style="margin-bottom: 10px;">Tingkat: <strong>{{ $prestasi->first()->tingkatPenghargaan->tingkat ?? '-' }}</strong></p>
 @endif
 @if(request('from') && request('to'))
     <p style="margin-bottom: 10px;">Periode: <strong>{{ \Carbon\Carbon::parse(request('from'))->format('d F Y') }} s/d {{ \Carbon\Carbon::parse(request('to'))->format('d F Y') }}</strong></p>

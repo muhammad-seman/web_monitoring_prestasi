@@ -218,6 +218,92 @@ class PrestasiSiswaController extends Controller
     }
 
     /**
+     * Validasi prestasi siswa yang dibuat oleh guru.
+     */
+    public function validasi(Request $request, PrestasiSiswa $prestasi_siswa)
+    {
+        $user = Auth::user();
+        $kelasGuru = Kelas::where('id_wali_kelas', $user->id)->pluck('id');
+        
+        // Validasi akses - guru hanya bisa memvalidasi prestasi siswa di kelasnya
+        if (!$kelasGuru->contains($prestasi_siswa->siswa->id_kelas)) {
+            abort(403, 'Anda tidak memiliki akses ke prestasi siswa ini.');
+        }
+
+        // Validasi bahwa prestasi ini dibuat oleh guru yang sama
+        if ($prestasi_siswa->created_by !== $user->id) {
+            return back()->with('error', 'Anda hanya dapat memvalidasi prestasi yang Anda buat sendiri.');
+        }
+
+        $request->validate([
+            'status' => 'required|in:diterima,ditolak',
+            'alasan_tolak' => 'nullable|string|max:255'
+        ]);
+        
+        // Store old status for comparison
+        $oldStatus = $prestasi_siswa->status;
+        
+        $prestasi_siswa->update([
+            'status' => $request->status,
+            'alasan_tolak' => $request->alasan_tolak,
+            'validated_at' => now(),
+            'validated_by' => $user->id
+        ]);
+        
+        // Send notification to parent if status changed to accepted or rejected
+        if ($oldStatus !== $request->status && $prestasi_siswa->siswa->wali_id) {
+            $statusText = $request->status === 'diterima' ? 'diterima' : 'ditolak';
+            $title = $request->status === 'diterima' ? 'Prestasi Diterima' : 'Prestasi Ditolak';
+            $message = "Prestasi '{$prestasi_siswa->nama_prestasi}' anak Anda {$prestasi_siswa->siswa->nama} telah {$statusText} oleh guru kelas.";
+            
+            if ($request->status === 'ditolak' && !empty($request->alasan_tolak)) {
+                $message .= " Alasan: {$request->alasan_tolak}";
+            }
+            
+            \App\Models\Notification::createForParent(
+                $prestasi_siswa->siswa->wali_id,
+                $title,
+                $message,
+                [
+                    'prestasi_id' => $prestasi_siswa->id,
+                    'siswa_id' => $prestasi_siswa->siswa->id,
+                    'siswa_nama' => $prestasi_siswa->siswa->nama,
+                    'prestasi_nama' => $prestasi_siswa->nama_prestasi,
+                    'action' => 'validated',
+                    'status' => $request->status
+                ]
+            );
+        }
+
+        // Send notification to student if status changed to accepted or rejected
+        if ($oldStatus !== $request->status && $prestasi_siswa->siswa->user_id) {
+            $statusText = $request->status === 'diterima' ? 'diterima' : 'ditolak';
+            $title = $request->status === 'diterima' ? 'Prestasi Diterima' : 'Prestasi Ditolak';
+            $message = "Prestasi '{$prestasi_siswa->nama_prestasi}' yang diajukan telah {$statusText} oleh guru kelas.";
+            
+            if ($request->status === 'ditolak' && !empty($request->alasan_tolak)) {
+                $message .= " Alasan: {$request->alasan_tolak}";
+            }
+            
+            \App\Models\Notification::create([
+                'user_id' => $prestasi_siswa->siswa->user_id,
+                'title' => $title,
+                'message' => $message,
+                'data' => json_encode([
+                    'prestasi_id' => $prestasi_siswa->id,
+                    'prestasi_nama' => $prestasi_siswa->nama_prestasi,
+                    'action' => 'validated',
+                    'status' => $request->status
+                ]),
+                'read_at' => null
+            ]);
+        }
+        
+        ActivityLogger::log('update', 'prestasi_siswa', 'Guru validasi prestasi: ' . $prestasi_siswa->nama_prestasi . ' status: ' . $request->status);
+        return redirect()->back()->with('success', 'Prestasi berhasil divalidasi.');
+    }
+
+    /**
      * Cetak rekap prestasi siswa di kelas yang diampu.
      */
     public function cetak(Request $request)

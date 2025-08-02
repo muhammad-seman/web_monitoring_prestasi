@@ -26,6 +26,10 @@ class PrestasiSiswaController extends Controller
         if ($request->filled('kategori')) {
             $query->where('id_kategori_prestasi', $request->kategori);
         }
+        // FILTER TINGKAT
+        if ($request->filled('tingkat')) {
+            $query->where('id_tingkat_penghargaan', $request->tingkat);
+        }
         // FILTER RANGE TANGGAL
         if ($request->filled('from')) {
             $query->whereDate('tanggal_prestasi', '>=', $request->from);
@@ -155,8 +159,136 @@ class PrestasiSiswaController extends Controller
             );
         }
 
+        // Send notification to student if status changed to accepted or rejected
+        if ($oldStatus !== $validated['status'] && in_array($validated['status'], ['diterima', 'ditolak']) && $prestasi_siswa->siswa->user_id) {
+            $statusText = $validated['status'] === 'diterima' ? 'diterima' : 'ditolak';
+            $title = $validated['status'] === 'diterima' ? 'Prestasi Diterima' : 'Prestasi Ditolak';
+            $message = "Prestasi '{$prestasi_siswa->nama_prestasi}' yang Anda ajukan telah {$statusText}.";
+            
+            if ($validated['status'] === 'ditolak' && !empty($validated['alasan_tolak'])) {
+                $message .= " Alasan: {$validated['alasan_tolak']}";
+            }
+            
+            Notification::create([
+                'user_id' => $prestasi_siswa->siswa->user_id,
+                'title' => $title,
+                'message' => $message,
+                'data' => json_encode([
+                    'prestasi_id' => $prestasi_siswa->id,
+                    'prestasi_nama' => $prestasi_siswa->nama_prestasi,
+                    'action' => 'validated',
+                    'status' => $validated['status']
+                ]),
+                'read_at' => null
+            ]);
+        }
+
         ActivityLogger::log('update', 'prestasi_siswa', 'Update prestasi: ' . $prestasi_siswa->nama_prestasi . ' oleh ' . ($prestasi_siswa->siswa->nama ?? '-'));
         return redirect()->route('admin.prestasi_siswa.index')->with('success', 'Prestasi siswa berhasil diupdate.');
+    }
+
+    /**
+     * Validasi prestasi siswa yang dibuat oleh guru (untuk akses admin).
+     */
+    public function validasiGuru(Request $request, PrestasiSiswa $prestasi_siswa)
+    {
+        // Validasi bahwa prestasi ini dibuat oleh guru (bukan admin)
+        $creator = $prestasi_siswa->creator;
+        if (!$creator || $creator->role !== 'guru') {
+            return back()->with('error', 'Prestasi ini tidak dibuat oleh guru.');
+        }
+
+        $request->validate([
+            'status' => 'required|in:diterima,ditolak',
+            'alasan_tolak' => 'nullable|string|max:255'
+        ]);
+        
+        // Store old status for comparison
+        $oldStatus = $prestasi_siswa->status;
+        
+        $prestasi_siswa->update([
+            'status' => $request->status,
+            'alasan_tolak' => $request->alasan_tolak,
+            'validated_at' => now(),
+            'validated_by' => Auth::id()
+        ]);
+        
+        // Send notification to parent if status changed to accepted or rejected
+        if ($oldStatus !== $request->status && $prestasi_siswa->siswa->wali_id) {
+            $statusText = $request->status === 'diterima' ? 'diterima' : 'ditolak';
+            $title = $request->status === 'diterima' ? 'Prestasi Diterima' : 'Prestasi Ditolak';
+            $message = "Prestasi '{$prestasi_siswa->nama_prestasi}' anak Anda {$prestasi_siswa->siswa->nama} telah {$statusText} oleh admin.";
+            
+            if ($request->status === 'ditolak' && !empty($request->alasan_tolak)) {
+                $message .= " Alasan: {$request->alasan_tolak}";
+            }
+            
+            Notification::createForParent(
+                $prestasi_siswa->siswa->wali_id,
+                $title,
+                $message,
+                [
+                    'prestasi_id' => $prestasi_siswa->id,
+                    'siswa_id' => $prestasi_siswa->siswa->id,
+                    'siswa_nama' => $prestasi_siswa->siswa->nama,
+                    'prestasi_nama' => $prestasi_siswa->nama_prestasi,
+                    'action' => 'validated',
+                    'status' => $request->status
+                ]
+            );
+        }
+
+        // Send notification to student if status changed to accepted or rejected
+        if ($oldStatus !== $request->status && $prestasi_siswa->siswa->user_id) {
+            $statusText = $request->status === 'diterima' ? 'diterima' : 'ditolak';
+            $title = $request->status === 'diterima' ? 'Prestasi Diterima' : 'Prestasi Ditolak';
+            $message = "Prestasi '{$prestasi_siswa->nama_prestasi}' yang diajukan telah {$statusText} oleh admin.";
+            
+            if ($request->status === 'ditolak' && !empty($request->alasan_tolak)) {
+                $message .= " Alasan: {$request->alasan_tolak}";
+            }
+            
+            Notification::create([
+                'user_id' => $prestasi_siswa->siswa->user_id,
+                'title' => $title,
+                'message' => $message,
+                'data' => json_encode([
+                    'prestasi_id' => $prestasi_siswa->id,
+                    'prestasi_nama' => $prestasi_siswa->nama_prestasi,
+                    'action' => 'validated',
+                    'status' => $request->status
+                ]),
+                'read_at' => null
+            ]);
+        }
+
+        // Send notification to guru (creator) about validation result
+        if ($oldStatus !== $request->status && $creator) {
+            $statusText = $request->status === 'diterima' ? 'diterima' : 'ditolak';
+            $title = $request->status === 'diterima' ? 'Prestasi Diterima Admin' : 'Prestasi Ditolak Admin';
+            $message = "Prestasi '{$prestasi_siswa->nama_prestasi}' yang Anda buat untuk siswa {$prestasi_siswa->siswa->nama} telah {$statusText} oleh admin.";
+            
+            if ($request->status === 'ditolak' && !empty($request->alasan_tolak)) {
+                $message .= " Alasan: {$request->alasan_tolak}";
+            }
+            
+            Notification::create([
+                'user_id' => $creator->id,
+                'title' => $title,
+                'message' => $message,
+                'data' => json_encode([
+                    'prestasi_id' => $prestasi_siswa->id,
+                    'prestasi_nama' => $prestasi_siswa->nama_prestasi,
+                    'siswa_nama' => $prestasi_siswa->siswa->nama,
+                    'action' => 'admin_validated',
+                    'status' => $request->status
+                ]),
+                'read_at' => null
+            ]);
+        }
+        
+        ActivityLogger::log('update', 'prestasi_siswa', 'Admin validasi prestasi guru: ' . $prestasi_siswa->nama_prestasi . ' status: ' . $request->status);
+        return redirect()->back()->with('success', 'Prestasi guru berhasil divalidasi.');
     }
 
     public function destroy(PrestasiSiswa $prestasi_siswa)
@@ -173,6 +305,9 @@ class PrestasiSiswaController extends Controller
 
         if ($request->filled('kategori')) {
             $query->where('id_kategori_prestasi', $request->kategori);
+        }
+        if ($request->filled('tingkat')) {
+            $query->where('id_tingkat_penghargaan', $request->tingkat);
         }
         if ($request->filled('from')) {
             $query->whereDate('tanggal_prestasi', '>=', $request->from);

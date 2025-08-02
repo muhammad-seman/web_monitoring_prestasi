@@ -64,7 +64,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('tingkat_penghargaan', TingkatPenghargaanController::class);
     Route::resource('ekstrakurikuler', EkstrakurikulerController::class);
     Route::resource('siswa_ekskul', SiswaEkskulController::class)->only(['index', 'store', 'destroy']);
+    Route::get('siswa_ekskul/cetak', [SiswaEkskulController::class, 'cetak'])->name('siswa_ekskul.cetak');
     Route::resource('prestasi_siswa', PrestasiSiswaController::class)->except('show');
+    
+    // Validasi prestasi yang dibuat guru
+    Route::post('prestasi_siswa/{prestasi_siswa}/validasi-guru', [PrestasiSiswaController::class, 'validasiGuru'])->name('prestasi_siswa.validasi_guru');
 
     Route::get('prestasi_siswa/cetak', [PrestasiSiswaController::class, 'cetak'])->name('prestasi_siswa.cetak');
     Route::get('siswa/cetak', [SiswaController::class, 'cetak'])->name('siswa.cetak');
@@ -88,6 +92,8 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     // Route::get('prestasi_siswa/{prestasi_siswa}', [GuruPrestasiSiswaController::class, 'show'])->name('prestasi_siswa.show');
     // Upload dokumen bukti
     Route::post('prestasi_siswa/{prestasi_siswa}/upload', [GuruPrestasiSiswaController::class, 'uploadDokumen'])->name('prestasi_siswa.upload');
+    // Validasi prestasi siswa
+    Route::post('prestasi_siswa/{prestasi_siswa}/validasi', [GuruPrestasiSiswaController::class, 'validasi'])->name('prestasi_siswa.validasi');
     // Cetak rekap prestasi siswa di kelasnya
     Route::get('prestasi_siswa/cetak', [GuruPrestasiSiswaController::class, 'cetak'])->name('prestasi_siswa.cetak');
 

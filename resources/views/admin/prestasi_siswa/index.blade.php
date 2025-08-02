@@ -21,6 +21,14 @@
                                 </option>
                                 @endforeach
                             </select>
+                            <select name="tingkat" class="form-select">
+                                <option value="">Semua Tingkat</option>
+                                @foreach($tingkat as $id => $nama_tingkat)
+                                <option value="{{ $id }}" {{ request('tingkat')==$id ? 'selected' : '' }}>
+                                    {{ $nama_tingkat }}
+                                </option>
+                                @endforeach
+                            </select>
                             <input type="date" name="from" class="form-control" value="{{ request('from') }}">
                             <span class="mx-1">s/d</span>
                             <input type="date" name="to" class="form-control" value="{{ request('to') }}">
@@ -88,6 +96,12 @@
                                         data-bs-target="#editPrestasiModal{{ $p->id }}" title="Edit">
                                         <span class="iconify" data-icon="mdi:pencil" data-width="18" data-height="18"></span>
                                     </button>
+                                    @if($p->creator && $p->creator->role == 'guru' && $p->status == 'menunggu_validasi')
+                                    <button class="btn btn-success btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#validasiGuruModal{{ $p->id }}" title="Validasi Prestasi Guru">
+                                        <span class="iconify" data-icon="mdi:check-circle" data-width="18" data-height="18"></span>
+                                    </button>
+                                    @endif
                                     <button class="btn btn-danger btn-sm" onclick="confirmDelete({{ $p->id }})"
                                         title="Hapus">
                                         <span class="iconify" data-icon="mdi:trash-can" data-width="18" data-height="18"></span>
@@ -310,6 +324,55 @@
 </div>
 @endforeach
 
+<!-- Modal Validasi Guru untuk setiap prestasi -->
+@foreach($prestasi as $p)
+@if($p->creator && $p->creator->role == 'guru' && $p->status == 'menunggu_validasi')
+<div class="modal fade" id="validasiGuruModal{{ $p->id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Validasi Prestasi Guru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('admin.prestasi_siswa.validasi_guru', $p->id) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <small><strong>Dibuat oleh:</strong> {{ $p->creator->nama ?? 'Guru' }} ({{ $p->creator->role ?? 'guru' }})</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Prestasi:</strong> {{ $p->nama_prestasi }}<br>
+                        <strong>Siswa:</strong> {{ $p->siswa->nama ?? '-' }}<br>
+                        <strong>Kategori:</strong> {{ $p->kategori->nama_kategori ?? '-' }}<br>
+                        <strong>Tingkat:</strong> {{ $p->tingkat->tingkat ?? '-' }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Status Validasi <span class="text-danger">*</span></label>
+                        <select name="status" class="form-control" onchange="toggleAlasanTolakGuruValidasi{{ $p->id }}(this.value)" required>
+                            <option value="">Pilih Status</option>
+                            <option value="diterima">Diterima</option>
+                            <option value="ditolak">Ditolak</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="alasanTolakDivGuruValidasi{{ $p->id }}" style="display: none;">
+                        <label class="form-label">Alasan Tolak</label>
+                        <textarea name="alasan_tolak" class="form-control" rows="3" placeholder="Masukkan alasan penolakan..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Validasi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+@endforeach
+
 <!-- Modal Tambah -->
 <div class="modal fade" id="createPrestasiModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -407,6 +470,20 @@
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // Function for guru validation modals
+    @foreach($prestasi as $p)
+    @if($p->creator && $p->creator->role == 'guru' && $p->status == 'menunggu_validasi')
+    function toggleAlasanTolakGuruValidasi{{ $p->id }}(status) {
+        const alasanDiv = document.getElementById('alasanTolakDivGuruValidasi{{ $p->id }}');
+        if (status === 'ditolak') {
+            alasanDiv.style.display = 'block';
+        } else {
+            alasanDiv.style.display = 'none';
+        }
+    }
+    @endif
+    @endforeach
+
     function confirmDelete(prestasiId) {
     Swal.fire({
       title: 'Yakin ingin menghapus data ini?',

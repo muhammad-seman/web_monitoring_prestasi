@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Siswa;
 use App\Models\Kelas;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SiswaController extends Controller
 {
@@ -55,9 +56,7 @@ class SiswaController extends Controller
             $siswa = $siswa->sortBy('nama')->values();
         }
 
-        return view('guru.siswa.cetak', [
-            'siswa' => $siswa,
-            'kelas' => $kelas,
-        ]);
+        $pdf = Pdf::loadView('guru.siswa.cetak', compact('siswa', 'kelas'));
+        return $pdf->stream('daftar-siswa-kelas.pdf');
     }
 }

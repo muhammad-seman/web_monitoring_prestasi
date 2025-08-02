@@ -115,6 +115,12 @@
                                         <span class="iconify" data-icon="mdi:upload" data-width="18" data-height="18"></span>
                                     </button>
                                     @endif
+                                    @if($p->status == 'menunggu_validasi' && $p->created_by == Auth::id())
+                                    <button class="btn btn-success btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#validasiPrestasiModal{{ $p->id }}" title="Validasi">
+                                        <span class="iconify" data-icon="mdi:check-circle" data-width="18" data-height="18"></span>
+                                    </button>
+                                    @endif
                                 </td>
                             </tr>
                             @empty
@@ -357,6 +363,51 @@
 </div>
 @endforeach
 
+<!-- Modal Validasi Prestasi untuk setiap prestasi -->
+@foreach($prestasi as $p)
+@if($p->status == 'menunggu_validasi' && $p->created_by == Auth::id())
+<div class="modal fade" id="validasiPrestasiModal{{ $p->id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Validasi Prestasi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('guru.prestasi_siswa.validasi', $p->id) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <strong>Prestasi:</strong> {{ $p->nama_prestasi }}<br>
+                        <strong>Siswa:</strong> {{ $p->siswa->nama ?? '-' }}<br>
+                        <strong>Kategori:</strong> {{ $p->kategori->nama_kategori ?? '-' }}<br>
+                        <strong>Tingkat:</strong> {{ $p->tingkat->tingkat ?? '-' }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Status Validasi <span class="text-danger">*</span></label>
+                        <select name="status" class="form-control" onchange="toggleAlasanTolakValidasi{{ $p->id }}(this.value)" required>
+                            <option value="">Pilih Status</option>
+                            <option value="diterima">Diterima</option>
+                            <option value="ditolak">Ditolak</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="alasanTolakDivValidasi{{ $p->id }}" style="display: none;">
+                        <label class="form-label">Alasan Tolak</label>
+                        <textarea name="alasan_tolak" class="form-control" rows="3" placeholder="Masukkan alasan penolakan..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Validasi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+@endforeach
+
 <!-- Modal Tambah -->
 <div class="modal fade" id="createPrestasiModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -450,5 +501,19 @@ function toggleAlasanTolak(status) {
         alasanDiv.style.display = 'none';
     }
 }
+
+// Function for validation modals
+@foreach($prestasi as $p)
+@if($p->status == 'menunggu_validasi' && $p->created_by == Auth::id())
+function toggleAlasanTolakValidasi{{ $p->id }}(status) {
+    const alasanDiv = document.getElementById('alasanTolakDivValidasi{{ $p->id }}');
+    if (status === 'ditolak') {
+        alasanDiv.style.display = 'block';
+    } else {
+        alasanDiv.style.display = 'none';
+    }
+}
+@endif
+@endforeach
 </script>
 @endsection 

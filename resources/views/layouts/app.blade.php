@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title')</title>
   <link rel="shortcut icon" type="image/png" href="{{ asset('assets/images/logos/favicon.png') }}" />
   <link rel="stylesheet" href="{{ asset('assets/css/styles.min.css') }}" />
@@ -74,15 +75,24 @@
           // Update the UI to show the notification as read
           const notificationElement = document.querySelector(`[onclick="markAsRead(${notificationId})"]`);
           if (notificationElement) {
-            notificationElement.classList.remove('bg-light');
+            // Remove the "Baru" badge
             const badge = notificationElement.querySelector('.badge');
             if (badge) {
               badge.remove();
             }
+            
+            // Remove background highlight for unread notifications
+            notificationElement.classList.remove('bg-light');
+            
+            // Add a visual indication that it's been read
+            notificationElement.style.opacity = '0.7';
           }
           
           // Update notification count
           updateNotificationCount();
+          
+          // Show a small success message
+          console.log('Notification marked as read');
         }
       })
       .catch(error => console.error('Error:', error));
@@ -92,19 +102,34 @@
       fetch('/notifications/count')
         .then(response => response.json())
         .then(data => {
-          const badge = document.querySelector('#waliNotifDropdown .badge');
+          const badge = document.querySelector('#notification-badge');
           if (data.count > 0) {
             if (badge) {
               badge.textContent = data.count;
+            } else {
+              // Create new badge if it doesn't exist
+              const dropdown = document.querySelector('#waliNotifDropdown');
+              if (dropdown) {
+                const newBadge = document.createElement('span');
+                newBadge.id = 'notification-badge';
+                newBadge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
+                newBadge.textContent = data.count;
+                dropdown.appendChild(newBadge);
+              }
             }
           } else {
-            if(badge) {
+            if (badge) {
               badge.remove();
             }
           }
         })
         .catch(error => console.error('Error:', error));
     }
+    
+    // Update notification count on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      updateNotificationCount();
+    });
   </script>
 </body>
 

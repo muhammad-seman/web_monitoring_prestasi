@@ -7,9 +7,14 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="card-title mb-0">Daftar Prestasi Saya</h4>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahPrestasiModal">
-                        <i class="ti ti-plus"></i> Tambah Prestasi
-                    </button>
+                    <div>
+                        <button class="btn btn-secondary me-2" onclick="cetakLaporan()" title="Cetak Laporan">
+                            <i class="ti ti-printer"></i> Cetak Laporan
+                        </button>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahPrestasiModal">
+                            <i class="ti ti-plus"></i> Tambah Prestasi
+                        </button>
+                    </div>
                 </div>
                 <!-- Filter -->
                 <form method="GET" class="row mb-3 g-2">
@@ -408,5 +413,29 @@
     </div>
 </div>
 @endforeach
+
+<script>
+function cetakLaporan() {
+    // Get current filter values
+    const kategori = document.querySelector('select[name="kategori"]').value;
+    const tingkat = document.querySelector('select[name="tingkat"]').value;
+    const ekskul = document.querySelector('select[name="ekskul"]').value;
+    const status = document.querySelector('select[name="status"]').value;
+    const from = document.querySelector('input[name="from"]').value;
+    const to = document.querySelector('input[name="to"]').value;
+    
+    // Build query string with current filters
+    const params = new URLSearchParams();
+    if (kategori) params.append('kategori', kategori);
+    if (tingkat) params.append('tingkat', tingkat);
+    if (ekskul) params.append('ekskul', ekskul);
+    if (status) params.append('status', status);
+    if (from) params.append('from', from);
+    if (to) params.append('to', to);
+    
+    // Open print page with current filters
+    window.open('{{ route("siswa.prestasi.cetak") }}?' + params.toString(), '_blank');
+}
+</script>
 
 @endsection 

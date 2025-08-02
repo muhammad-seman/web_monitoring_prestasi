@@ -72,7 +72,7 @@
                 $unreadCount = auth()->user()->unreadNotifications()->count();
               @endphp
               @if($unreadCount > 0)
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notification-badge">
                   {{ $unreadCount }}
                 </span>
               @endif

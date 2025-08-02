@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\PrestasiSiswa;
 use App\Models\User;
+use App\Models\Kelas;
+use App\Models\Ekstrakurikuler;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -45,6 +48,23 @@ class DashboardController extends Controller
             ->groupBy('kategori_prestasi.id', 'kategori_prestasi.nama_kategori')
             ->get();
 
+        // Top 5 Kelas dengan Prestasi Terbanyak
+        $topKelasPrestasi = Kelas::select('kelas.nama_kelas', DB::raw('count(prestasi_siswa.id) as total_prestasi'))
+            ->leftJoin('siswa', 'kelas.id', '=', 'siswa.id_kelas')
+            ->leftJoin('prestasi_siswa', 'siswa.id', '=', 'prestasi_siswa.id_siswa')
+            ->groupBy('kelas.id', 'kelas.nama_kelas')
+            ->orderBy('total_prestasi', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Top 5 Ekstrakurikuler dengan Prestasi Terbanyak
+        $topEkskulPrestasi = Ekstrakurikuler::select('ekstrakurikuler.nama', DB::raw('count(prestasi_siswa.id) as total_prestasi'))
+            ->leftJoin('prestasi_siswa', 'ekstrakurikuler.id', '=', 'prestasi_siswa.id_ekskul')
+            ->groupBy('ekstrakurikuler.id', 'ekstrakurikuler.nama')
+            ->orderBy('total_prestasi', 'desc')
+            ->limit(5)
+            ->get();
+
         return view('wali.dashboard', compact(
             'anak', 
             'totalPrestasi', 
@@ -53,7 +73,9 @@ class DashboardController extends Controller
             'prestasiDitolak',
             'prestasiTerbaru',
             'prestasiPerBulan',
-            'prestasiPerKategori'
+            'prestasiPerKategori',
+            'topKelasPrestasi',
+            'topEkskulPrestasi'
         ));
     }
 }

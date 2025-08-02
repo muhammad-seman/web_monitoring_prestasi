@@ -1,103 +1,65 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Data Siswa - Kelas Saya</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            font-size: 12px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
-        }
-        .kelas-info {
-            margin-bottom: 15px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-        .no-data {
-            text-align: center;
-            padding: 20px;
-            font-style: italic;
-        }
-        @media print {
-            body { margin: 0; }
-            .no-print { display: none; }
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h2>DAFTAR SISWA KELAS SAYA</h2>
-        <p>Sistem Monitoring Prestasi Siswa</p>
-        <p>Tanggal Cetak: {{ date('d-m-Y H:i') }}</p>
-    </div>
+@extends('layouts.letterhead', [
+    'title' => 'Daftar Siswa Kelas',
+    'date' => '',
+    'letterType' => '',
+    'hideSignature' => true
+])
 
-    <div class="kelas-info">
-        @if(isset($kelas) && $kelas->count() > 0)
-            <strong>Kelas yang diampu:</strong>
-            @foreach($kelas as $kls)
-                {{ $kls->nama_kelas }}{{ !$loop->last ? ', ' : '' }}
-            @endforeach
-        @else
-            <strong>Kelas:</strong> Tidak ada kelas yang diampu
-        @endif
-    </div>
+@section('content')
+<div style="text-align: center; margin-bottom: 20px;">
+    <h3 style="text-decoration: underline; font-size: 16px; margin-bottom: 20px;">DAFTAR SISWA KELAS</h3>
+</div>
 
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 30px;">#</th>
-                <th>NISN</th>
-                <th>Nama</th>
-                <th>Gender</th>
-                <th>Tempat, Tanggal Lahir</th>
-                <th>Alamat</th>
-                <th>Tahun Masuk</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($siswa as $i => $s)
-            <tr>
-                <td>{{ $i + 1 }}</td>
-                <td>{{ $s->nisn }}</td>
-                <td>{{ $s->nama }}</td>
-                <td>{{ $s->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
-                <td>
-                    {{ $s->tempat_lahir ?? '-' }},
-                    {{ $s->tanggal_lahir ? \Carbon\Carbon::parse($s->tanggal_lahir)->format('d-m-Y') : '-' }}
-                </td>
-                <td>{{ $s->alamat ?? '-' }}</td>
-                <td>{{ $s->tahun_masuk ?? '-' }}</td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="7" class="no-data">Belum ada data siswa di kelas ini.</td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
+@if(isset($kelas) && $kelas->count() > 0)
+    <p style="margin-bottom: 10px;">Kelas yang diampu: <strong>
+        @foreach($kelas as $kls)
+            {{ $kls->nama_kelas }}{{ !$loop->last ? ', ' : '' }}
+        @endforeach
+    </strong></p>
+@else
+    <p style="margin-bottom: 10px;">Kelas: <strong>Tidak ada kelas yang diampu</strong></p>
+@endif
 
-    <div style="margin-top: 30px;">
-        <p><strong>Total Siswa:</strong> {{ $siswa->count() }} orang</p>
+<table>
+    <thead>
+        <tr>
+            <th style="width: 5%; text-align: center;">No</th>
+            <th style="width: 12%;">NISN</th>
+            <th style="width: 18%;">Nama</th>
+            <th style="width: 10%;">Jenis Kelamin</th>
+            <th style="width: 15%;">Tempat, Tanggal Lahir</th>
+            <th style="width: 25%;">Alamat</th>
+            <th style="width: 10%;">Tahun Masuk</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse($siswa as $i => $s)
+        <tr>
+            <td style="text-align: center;">{{ $i + 1 }}</td>
+            <td>{{ $s->nisn }}</td>
+            <td>{{ $s->nama }}</td>
+            <td>{{ $s->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
+            <td>
+                {{ $s->tempat_lahir ?? '-' }}{{ $s->tempat_lahir && $s->tanggal_lahir ? ', ' : '' }}{{ $s->tanggal_lahir ? \Carbon\Carbon::parse($s->tanggal_lahir)->format('d/m/Y') : ($s->tempat_lahir ? '' : '-') }}
+            </td>
+            <td style="font-size: 10px;">{{ $s->alamat ?? '-' }}</td>
+            <td style="text-align: center;">{{ $s->tahun_masuk ?? '-' }}</td>
+        </tr>
+        @empty
+        <tr>
+            <td colspan="7" style="text-align: center; font-style: italic;">Tidak ada data siswa</td>
+        </tr>
+        @endforelse
+    </tbody>
+</table>
+
+<!-- SIGNATURE SECTION -->
+<div style="margin-top: 50px; text-align: right; font-size: 12px;">
+    <div style="display: inline-block; text-align: left;">
+        <br><br>
+        <strong>Wali Kelas</strong><br>
+        <div style="border-bottom: 1px solid #000; width: 150px; margin: 60px 0 0;"></div>
+        <div style="margin-top: 5px;">{{ Auth::user()->nama ?? 'Nama Guru' }}</div>
     </div>
-</body>
-</html>
+</div>
+@endsection

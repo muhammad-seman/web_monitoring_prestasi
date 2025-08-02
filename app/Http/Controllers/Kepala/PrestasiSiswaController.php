@@ -92,11 +92,63 @@ class PrestasiSiswaController extends Controller
             'catatan' => 'nullable|string|max:255'
         ]);
         
+        // Store old status for comparison
+        $oldStatus = $prestasi_siswa->status;
+        
         $prestasi_siswa->update([
             'status' => $request->status,
             'alasan_tolak' => $request->catatan,
             'validated_at' => now()
         ]);
+        
+        // Send notification to parent if status changed to accepted or rejected
+        if ($oldStatus !== $request->status && $prestasi_siswa->siswa->wali_id) {
+            $statusText = $request->status === 'diterima' ? 'diterima' : 'ditolak';
+            $title = $request->status === 'diterima' ? 'Prestasi Diterima' : 'Prestasi Ditolak';
+            $message = "Prestasi '{$prestasi_siswa->nama_prestasi}' anak Anda {$prestasi_siswa->siswa->nama} telah {$statusText}.";
+            
+            if ($request->status === 'ditolak' && !empty($request->catatan)) {
+                $message .= " Alasan: {$request->catatan}";
+            }
+            
+            \App\Models\Notification::createForParent(
+                $prestasi_siswa->siswa->wali_id,
+                $title,
+                $message,
+                [
+                    'prestasi_id' => $prestasi_siswa->id,
+                    'siswa_id' => $prestasi_siswa->siswa->id,
+                    'siswa_nama' => $prestasi_siswa->siswa->nama,
+                    'prestasi_nama' => $prestasi_siswa->nama_prestasi,
+                    'action' => 'validated',
+                    'status' => $request->status
+                ]
+            );
+        }
+
+        // Send notification to student if status changed to accepted or rejected
+        if ($oldStatus !== $request->status && $prestasi_siswa->siswa->user_id) {
+            $statusText = $request->status === 'diterima' ? 'diterima' : 'ditolak';
+            $title = $request->status === 'diterima' ? 'Prestasi Diterima' : 'Prestasi Ditolak';
+            $message = "Prestasi '{$prestasi_siswa->nama_prestasi}' yang Anda ajukan telah {$statusText}.";
+            
+            if ($request->status === 'ditolak' && !empty($request->catatan)) {
+                $message .= " Alasan: {$request->catatan}";
+            }
+            
+            \App\Models\Notification::create([
+                'user_id' => $prestasi_siswa->siswa->user_id,
+                'title' => $title,
+                'message' => $message,
+                'data' => json_encode([
+                    'prestasi_id' => $prestasi_siswa->id,
+                    'prestasi_nama' => $prestasi_siswa->nama_prestasi,
+                    'action' => 'validated',
+                    'status' => $request->status
+                ]),
+                'read_at' => null
+            ]);
+        }
         
         return redirect()->back()->with('success', 'Prestasi berhasil divalidasi.');
     }

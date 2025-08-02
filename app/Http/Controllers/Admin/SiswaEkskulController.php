@@ -8,6 +8,7 @@ use App\Models\SiswaEkskul;
 use App\Models\Siswa;
 use App\Models\Ekstrakurikuler;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SiswaEkskulController extends Controller
 {
@@ -39,6 +40,38 @@ class SiswaEkskulController extends Controller
         $kelas = \App\Models\Kelas::pluck('nama_kelas', 'id');
 
         return view('admin.siswa_ekskul.index', compact('siswaEkskul', 'ekskul', 'siswa', 'kelas'));
+    }
+
+    /**
+     * Print siswa ekstrakurikuler data.
+     */
+    public function cetak(Request $request)
+    {
+        $query = SiswaEkskul::with(['siswa.kelas', 'ekskul']);
+
+        // Filter ekstrakurikuler
+        if ($request->filled('ekskul')) {
+            $query->where('id_ekskul', $request->ekskul);
+        }
+
+        // Filter kelas
+        if ($request->filled('kelas')) {
+            $query->whereHas('siswa', function($q) use ($request) {
+                $q->where('id_kelas', $request->kelas);
+            });
+        }
+
+        $data['siswaEkskul'] = $query->get()->sortBy('siswa.nama');
+
+        // Data untuk filter info
+        $ekskul = Ekstrakurikuler::pluck('nama', 'id');
+        $kelas = \App\Models\Kelas::pluck('nama_kelas', 'id');
+
+        $data['selectedEkskul'] = $request->ekskul ? $ekskul[$request->ekskul] : null;
+        $data['selectedKelas'] = $request->kelas ? $kelas[$request->kelas] : null;
+
+        $pdf = Pdf::loadView('admin.siswa_ekskul.cetak', $data);
+        return $pdf->stream('data-siswa-ekskul-' . now()->format('Ymd-His') . '.pdf');
     }
 
     /**
