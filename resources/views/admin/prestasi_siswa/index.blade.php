@@ -496,7 +496,7 @@
       if (result.isConfirmed) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `/admin/prestasi-siswa/${prestasiId}`;
+        form.action = `/admin/prestasi_siswa/${prestasiId}`;
         form.innerHTML = '@csrf @method("DELETE")';
         document.body.appendChild(form);
         form.submit();
