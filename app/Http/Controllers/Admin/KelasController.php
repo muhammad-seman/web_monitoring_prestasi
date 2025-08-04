@@ -22,7 +22,7 @@ class KelasController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama_kelas'    => 'required|string|max:50',
+            'nama_kelas'    => 'required|string|max:50|unique:kelas,nama_kelas',
             'id_wali_kelas' => 'nullable|exists:users,id',
             'tahun_ajaran'  => 'required|string|max:20',
         ]);
@@ -43,7 +43,7 @@ class KelasController extends Controller
     public function update(Request $request, Kelas $kela)
     {
         $validated = $request->validate([
-            'nama_kelas'    => 'required|string|max:50',
+            'nama_kelas'    => 'required|string|max:50|unique:kelas,nama_kelas,' . $kela->id,
             'id_wali_kelas' => 'nullable|exists:users,id',
             'tahun_ajaran'  => 'required|string|max:20',
         ]);
