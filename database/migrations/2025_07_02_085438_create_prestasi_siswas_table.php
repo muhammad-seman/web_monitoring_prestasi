@@ -17,6 +17,7 @@ return new class extends Migration
         $table->unsignedBigInteger('id_kategori_prestasi');
         $table->unsignedBigInteger('id_tingkat_penghargaan');
         $table->unsignedBigInteger('id_ekskul')->nullable(); // Jika prestasi dari ekskul
+        $table->unsignedBigInteger('id_tahun_ajaran')->nullable(); // Academic year tracking
         $table->string('nama_prestasi', 100);
         $table->string('penyelenggara', 100)->nullable();
         $table->date('tanggal_prestasi')->nullable();
@@ -34,6 +35,7 @@ return new class extends Migration
         $table->foreign('id_kategori_prestasi')->references('id')->on('kategori_prestasi')->onDelete('restrict');
         $table->foreign('id_tingkat_penghargaan')->references('id')->on('tingkat_penghargaan')->onDelete('restrict');
         $table->foreign('id_ekskul')->references('id')->on('ekstrakurikuler')->onDelete('set null');
+        $table->foreign('id_tahun_ajaran')->references('id')->on('tahun_ajaran')->onDelete('set null');
         $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
         $table->foreign('validated_by')->references('id')->on('users')->onDelete('set null');
     });

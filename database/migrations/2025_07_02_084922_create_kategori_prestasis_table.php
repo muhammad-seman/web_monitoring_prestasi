@@ -14,6 +14,11 @@ return new class extends Migration
         Schema::create('kategori_prestasi', function (Blueprint $table) {
             $table->id();
             $table->string('nama_kategori', 50);
+            $table->enum('jenis_prestasi', ['akademik', 'non_akademik'])->default('akademik');
+            $table->enum('tingkat_kompetisi', ['sekolah', 'kabupaten', 'provinsi', 'nasional', 'internasional'])->nullable();
+            $table->string('bidang_prestasi', 50)->nullable();
+            $table->text('deskripsi')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

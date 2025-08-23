@@ -8,15 +8,42 @@ class KelasSeeder extends Seeder
 {
     public function run()
     {
-        Kelas::create([
-            'nama_kelas'    => 'X IPA 1',
-            // 'id_wali_kelas' => 2, // Asumsi id 2 user guru
-            'tahun_ajaran'  => '2024/2025',
-        ]);
-        Kelas::create([
-            'nama_kelas'    => 'X IPS 1',
-            // 'id_wali_kelas' => 3, // Asumsi id 3 user guru
-            'tahun_ajaran'  => '2024/2025',
-        ]);
+        // Create comprehensive class data for all grades and programs
+        $tingkats = ['X', 'XI', 'XII'];
+        $jurusans = ['IPA', 'IPS', 'BAHASA'];
+        $nomors = [1, 2, 3];
+        
+        foreach ($tingkats as $tingkat) {
+            foreach ($jurusans as $jurusan) {
+                // For IPA and IPS, create 3 classes each, for BAHASA only 1
+                $max_nomor = ($jurusan === 'BAHASA') ? 1 : 3;
+                for ($nomor = 1; $nomor <= $max_nomor; $nomor++) {
+                    Kelas::create([
+                        'nama_kelas' => "{$tingkat} {$jurusan} {$nomor}",
+                        'tingkat' => $tingkat,
+                        'jurusan' => $jurusan,
+                        'tahun_ajaran' => '2024/2025',
+                    ]);
+                }
+            }
+        }
+        
+        // Also create some classes for previous years for testing multi-year analytics
+        foreach (['2022/2023', '2023/2024'] as $tahunAjaran) {
+            foreach (['X', 'XI', 'XII'] as $tingkat) {
+                foreach (['IPA', 'IPS'] as $jurusan) {
+                    for ($nomor = 1; $nomor <= 2; $nomor++) {
+                        Kelas::create([
+                            'nama_kelas' => "{$tingkat} {$jurusan} {$nomor}",
+                            'tingkat' => $tingkat,
+                            'jurusan' => $jurusan,
+                            'tahun_ajaran' => $tahunAjaran,
+                        ]);
+                    }
+                }
+            }
+        }
+        
+        echo "✅ Created comprehensive class data for multiple academic years\n";
     }
 }

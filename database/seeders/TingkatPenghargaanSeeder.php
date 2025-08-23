@@ -8,12 +8,24 @@ class TingkatPenghargaanSeeder extends Seeder
 {
     public function run()
     {
-        TingkatPenghargaan::insert([
-            ['tingkat' => 'Sekolah',       'created_at' => now(), 'updated_at' => now()],
-            ['tingkat' => 'Kabupaten/Kota','created_at' => now(), 'updated_at' => now()],
-            ['tingkat' => 'Provinsi',      'created_at' => now(), 'updated_at' => now()],
-            ['tingkat' => 'Nasional',      'created_at' => now(), 'updated_at' => now()],
-            ['tingkat' => 'Internasional', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        // Create comprehensive award levels data
+        $tingkatPenghargaan = [
+            ['nama_tingkat' => 'Juara 1', 'poin' => 100],
+            ['nama_tingkat' => 'Juara 2', 'poin' => 85],
+            ['nama_tingkat' => 'Juara 3', 'poin' => 70],
+            ['nama_tingkat' => 'Juara Harapan 1', 'poin' => 60],
+            ['nama_tingkat' => 'Juara Harapan 2', 'poin' => 50],
+            ['nama_tingkat' => 'Peserta Terbaik', 'poin' => 40],
+            ['nama_tingkat' => 'Peserta', 'poin' => 25],
+            ['nama_tingkat' => 'Medali Emas', 'poin' => 100],
+            ['nama_tingkat' => 'Medali Perak', 'poin' => 85],
+            ['nama_tingkat' => 'Medali Perunggu', 'poin' => 70],
+        ];
+        
+        foreach ($tingkatPenghargaan as $tingkat) {
+            TingkatPenghargaan::create($tingkat);
+        }
+        
+        echo "✅ Created comprehensive award levels data\n";
     }
 }

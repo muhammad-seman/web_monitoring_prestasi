@@ -17,6 +17,12 @@ return new class extends Migration
             $table->unsignedBigInteger('id_ekskul');
             $table->string('jabatan', 30)->nullable();     // Ketua, anggota, dll
             $table->string('periode', 20)->nullable();     // Semester atau tahun ajaran
+            $table->string('tahun_ajaran', 10)->nullable(); // 2024/2025
+            $table->enum('semester', ['ganjil', 'genap'])->nullable();
+            $table->date('tanggal_mulai')->nullable();
+            $table->date('tanggal_selesai')->nullable();
+            $table->enum('status_keaktifan', ['aktif', 'non_aktif', 'graduated'])->default('aktif');
+            $table->text('keterangan')->nullable();
             $table->timestamps();
     
             $table->foreign('id_siswa')->references('id')->on('siswa')->onDelete('cascade');
