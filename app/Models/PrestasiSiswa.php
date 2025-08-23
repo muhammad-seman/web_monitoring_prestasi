@@ -14,6 +14,7 @@ class PrestasiSiswa extends Model
         'id_kategori_prestasi',
         'id_tingkat_penghargaan',
         'id_ekskul',
+        'id_tahun_ajaran',
         'nama_prestasi',
         'penyelenggara',
         'tanggal_prestasi',
@@ -50,6 +51,12 @@ class PrestasiSiswa extends Model
     public function ekskul()
     {
         return $this->belongsTo(Ekstrakurikuler::class, 'id_ekskul');
+    }
+
+    // Relasi ke tahun ajaran
+    public function tahunAjaran()
+    {
+        return $this->belongsTo(TahunAjaran::class, 'id_tahun_ajaran');
     }
 
     // Relasi ke user creator & validator

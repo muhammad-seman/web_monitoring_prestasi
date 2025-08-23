@@ -9,6 +9,10 @@ use App\Http\Controllers\Admin\PrestasiSiswaController;
 use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Admin\TingkatPenghargaanController;
 use App\Http\Controllers\Admin\SiswaEkskulController;
+use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\TahunAjaranController;
+use App\Http\Controllers\Admin\KenaikanKelasController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\NotificationController;
@@ -72,6 +76,38 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::get('prestasi_siswa/cetak', [PrestasiSiswaController::class, 'cetak'])->name('prestasi_siswa.cetak');
     Route::get('siswa/cetak', [SiswaController::class, 'cetak'])->name('siswa.cetak');
+    
+    // Advanced Analytics Routes
+    Route::prefix('analytics')->name('analytics.')->group(function () {
+        Route::get('/', [AnalyticsController::class, 'index'])->name('index');
+        Route::get('/multi-year-comparison', [AnalyticsController::class, 'multiYearComparison'])->name('multi_year_comparison');
+        Route::get('/student-analysis/{siswa}', [AnalyticsController::class, 'individualStudentAnalysis'])->name('student_analysis');
+        Route::get('/school-performance', [AnalyticsController::class, 'schoolPerformanceAnalysis'])->name('school_performance');
+        Route::get('/extracurricular-analysis', [AnalyticsController::class, 'extracurricularAnalysis'])->name('extracurricular_analysis');
+        Route::get('/students-list', [AnalyticsController::class, 'getStudentsList'])->name('students_list');
+    });
+
+    // Advanced Reporting Routes
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::post('/student', [ReportController::class, 'generateStudentReport'])->name('student');
+        Route::post('/class', [ReportController::class, 'generateClassReport'])->name('class');
+        Route::post('/school', [ReportController::class, 'generateSchoolReport'])->name('school');
+        Route::post('/multi-year-comparison', [ReportController::class, 'generateMultiYearComparison'])->name('multi_year_comparison');
+    });
+
+    // Academic Year Management Routes
+    Route::resource('tahun_ajaran', TahunAjaranController::class);
+    Route::post('tahun_ajaran/{tahun_ajaran}/set-active', [TahunAjaranController::class, 'setActive'])->name('tahun_ajaran.set_active');
+    Route::post('tahun_ajaran/{tahun_ajaran}/change-semester', [TahunAjaranController::class, 'changeSemester'])->name('tahun_ajaran.change_semester');
+    Route::get('tahun_ajaran-active', [TahunAjaranController::class, 'getActive'])->name('tahun_ajaran.get_active');
+    Route::get('tahun_ajaran-select', [TahunAjaranController::class, 'getAllForSelect'])->name('tahun_ajaran.for_select');
+    Route::post('tahun_ajaran/{tahun_ajaran}/duplicate', [TahunAjaranController::class, 'duplicateToNext'])->name('tahun_ajaran.duplicate');
+
+    // Class Progression Routes
+    Route::resource('kenaikan_kelas', KenaikanKelasController::class);
+    Route::post('kenaikan_kelas/bulk-process', [KenaikanKelasController::class, 'bulkProcess'])->name('kenaikan_kelas.bulk_process');
+    Route::get('kenaikan_kelas-eligible-students', [KenaikanKelasController::class, 'getEligibleStudents'])->name('kenaikan_kelas.eligible_students');
 });
 
 // Guru only (prefix dan middleware)

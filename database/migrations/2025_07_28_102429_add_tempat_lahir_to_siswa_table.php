@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('siswa', function (Blueprint $table) {
-            $table->string('tempat_lahir', 100)->nullable()->after('tanggal_lahir');
-        });
+        // tempat_lahir column already exists in the original siswa table creation
+        // This migration is kept for compatibility but does nothing
     }
 
     /**
@@ -21,8 +20,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('siswa', function (Blueprint $table) {
-            $table->dropColumn('tempat_lahir');
-        });
+        // Nothing to revert since no changes were made in up()
     }
 };

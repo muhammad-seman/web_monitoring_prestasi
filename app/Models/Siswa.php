@@ -51,4 +51,32 @@ class Siswa extends Model
     {
         return $this->hasMany(PrestasiSiswa::class, 'id_siswa');
     }
+
+    // Relasi ke kenaikan kelas
+    public function kenaikanKelas()
+    {
+        return $this->hasMany(KenaikanKelas::class, 'id_siswa');
+    }
+
+    // Get prestasi by academic year
+    public function prestasiByTahunAjaran($tahunAjaranId = null)
+    {
+        $query = $this->prestasi();
+        if ($tahunAjaranId) {
+            $query->where('id_tahun_ajaran', $tahunAjaranId);
+        }
+        return $query;
+    }
+
+    // Get current class progression status
+    public function getCurrentClassProgression()
+    {
+        $activeTahunAjaran = TahunAjaran::getActiveTahunAjaran();
+        if ($activeTahunAjaran) {
+            return $this->kenaikanKelas()
+                ->where('tahun_ajaran_id', $activeTahunAjaran->id)
+                ->first();
+        }
+        return null;
+    }
 }
