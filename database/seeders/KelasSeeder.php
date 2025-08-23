@@ -20,8 +20,6 @@ class KelasSeeder extends Seeder
                 for ($nomor = 1; $nomor <= $max_nomor; $nomor++) {
                     Kelas::create([
                         'nama_kelas' => "{$tingkat} {$jurusan} {$nomor}",
-                        'tingkat' => $tingkat,
-                        'jurusan' => $jurusan,
                         'tahun_ajaran' => '2024/2025',
                     ]);
                 }
@@ -35,8 +33,6 @@ class KelasSeeder extends Seeder
                     for ($nomor = 1; $nomor <= 2; $nomor++) {
                         Kelas::create([
                             'nama_kelas' => "{$tingkat} {$jurusan} {$nomor}",
-                            'tingkat' => $tingkat,
-                            'jurusan' => $jurusan,
                             'tahun_ajaran' => $tahunAjaran,
                         ]);
                     }

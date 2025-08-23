@@ -13,14 +13,14 @@ class EkstrakurikulerSeeder extends Seeder
         
         // Also create some specific important extracurriculars
         $specificExtracurriculars = [
-            ['nama_ekstrakurikuler' => 'OSIS', 'pembina' => 'Drs. Ahmad Wijaya', 'deskripsi' => 'Organisasi Siswa Intra Sekolah'],
-            ['nama_ekstrakurikuler' => 'Pramuka', 'pembina' => 'Siti Nurhaliza, S.Pd', 'deskripsi' => 'Praja Muda Karana - wajib untuk kelas X'],
-            ['nama_ekstrakurikuler' => 'PMR', 'pembina' => 'dr. Budi Santoso', 'deskripsi' => 'Palang Merah Remaja'],
+            ['nama' => 'OSIS', 'pembina' => 'Drs. Ahmad Wijaya', 'keterangan' => 'Organisasi Siswa Intra Sekolah'],
+            ['nama' => 'Pramuka', 'pembina' => 'Siti Nurhaliza, S.Pd', 'keterangan' => 'Praja Muda Karana - wajib untuk kelas X'],
+            ['nama' => 'PMR', 'pembina' => 'dr. Budi Santoso', 'keterangan' => 'Palang Merah Remaja'],
         ];
         
         foreach ($specificExtracurriculars as $ekskul) {
             Ekstrakurikuler::firstOrCreate(
-                ['nama_ekstrakurikuler' => $ekskul['nama_ekstrakurikuler']],
+                ['nama' => $ekskul['nama']],
                 $ekskul
             );
         }

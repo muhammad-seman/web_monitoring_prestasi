@@ -22,9 +22,10 @@ class SiswaSeeder extends Seeder
             $studentCount = rand(25, 30);
             
             // Use factory to create students and assign them to this class
+            $tingkat = $this->extractTingkatFromNama($kelasItem->nama_kelas);
             Siswa::factory($studentCount)->create([
                 'id_kelas' => $kelasItem->id,
-                'tahun_masuk' => $this->getTahunMasukForTingkat($kelasItem->tingkat),
+                'tahun_masuk' => $this->getTahunMasukForTingkat($tingkat),
             ]);
         }
         
@@ -32,10 +33,11 @@ class SiswaSeeder extends Seeder
         $kelasPrevious = Kelas::whereIn('tahun_ajaran', ['2022/2023', '2023/2024'])->get();
         foreach ($kelasPrevious as $kelasItem) {
             $studentCount = rand(20, 25);
+            $tingkat = $this->extractTingkatFromNama($kelasItem->nama_kelas);
             
             Siswa::factory($studentCount)->create([
                 'id_kelas' => $kelasItem->id,
-                'tahun_masuk' => $this->getTahunMasukForPreviousYear($kelasItem->tingkat, $kelasItem->tahun_ajaran),
+                'tahun_masuk' => $this->getTahunMasukForPreviousYear($tingkat, $kelasItem->tahun_ajaran),
             ]);
         }
         
@@ -62,5 +64,12 @@ class SiswaSeeder extends Seeder
             'XII' => (int)$year - 2,
             default => (int)$year
         };
+    }
+    
+    private function extractTingkatFromNama($namaKelas)
+    {
+        // Extract tingkat from class name like "XI IPA 1" -> "XI"
+        $parts = explode(' ', $namaKelas);
+        return isset($parts[0]) ? $parts[0] : 'X'; // Default to X if not found
     }
 }

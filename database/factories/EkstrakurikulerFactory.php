@@ -23,8 +23,8 @@ class EkstrakurikulerFactory extends Factory
         ];
         
         return [
-            'nama_ekstrakurikuler' => $this->faker->unique()->randomElement($ekstrakurikuler),
-            'deskripsi' => $this->faker->paragraph(),
+            'nama' => $this->faker->unique()->randomElement($ekstrakurikuler),
+            'keterangan' => $this->faker->paragraph(),
             'pembina' => $this->faker->name(),
         ];
     }

@@ -17,8 +17,7 @@ class TingkatPenghargaanFactory extends Factory
     public function definition(): array
     {
         return [
-            'nama_tingkat' => $this->faker->randomElement(['Juara 1', 'Juara 2', 'Juara 3', 'Juara Harapan 1', 'Juara Harapan 2', 'Peserta Terbaik']),
-            'poin' => $this->faker->numberBetween(5, 100),
+            'tingkat' => $this->faker->randomElement(['Juara 1', 'Juara 2', 'Juara 3', 'Juara Harapan 1', 'Juara Harapan 2', 'Peserta Terbaik']),
         ];
     }
 }

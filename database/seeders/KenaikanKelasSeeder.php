@@ -23,10 +23,10 @@ class KenaikanKelasSeeder extends Seeder
         }
         
         // Get XI classes as source (kelas_asal)
-        $kelasXI = Kelas::where('tingkat', 'XI')->where('tahun_ajaran', '2024/2025')->get();
+        $kelasXI = Kelas::where('nama_kelas', 'LIKE', 'XI%')->where('tahun_ajaran', '2024/2025')->get();
         
         // Get XII classes as destination (kelas_tujuan)
-        $kelasXII = Kelas::where('tingkat', 'XII')->where('tahun_ajaran', '2024/2025')->get();
+        $kelasXII = Kelas::where('nama_kelas', 'LIKE', 'XII%')->where('tahun_ajaran', '2024/2025')->get();
         
         if ($kelasXI->isEmpty() || $kelasXII->isEmpty()) {
             echo "❌ XI or XII classes not found! Please run KelasSeeder first.\n";
@@ -40,8 +40,11 @@ class KenaikanKelasSeeder extends Seeder
             // Get students from this XI class (take some of them, not all)
             $siswaList = Siswa::where('id_kelas', $kelasAsal->id)->take(20)->get();
             
-            // Find corresponding XII class (same jurusan)
-            $kelasTujuan = $kelasXII->where('jurusan', $kelasAsal->jurusan)->first();
+            // Find corresponding XII class (same jurusan) - extract from nama_kelas
+            $jurusanAsal = $this->extractJurusanFromNama($kelasAsal->nama_kelas);
+            $kelasTujuan = $kelasXII->first(function($kelas) use ($jurusanAsal) {
+                return str_contains($kelas->nama_kelas, $jurusanAsal);
+            });
             
             if (!$kelasTujuan || $siswaList->isEmpty()) {
                 continue;
@@ -62,5 +65,12 @@ class KenaikanKelasSeeder extends Seeder
         }
         
         echo "✅ Created {$kenaikanCount} class progression records (XI to XII)\n";
+    }
+    
+    private function extractJurusanFromNama($namaKelas)
+    {
+        // Extract jurusan from class name like "XI IPA 1" -> "IPA"
+        $parts = explode(' ', $namaKelas);
+        return isset($parts[1]) ? $parts[1] : 'IPA'; // Default to IPA if not found
     }
 }

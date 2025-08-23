@@ -49,7 +49,12 @@ class TahunAjaranSeeder extends Seeder
         ];
 
         foreach ($tahunAjaranData as $data) {
-            TahunAjaran::create($data);
+            TahunAjaran::firstOrCreate(
+                ['nama_tahun_ajaran' => $data['nama_tahun_ajaran']],
+                $data
+            );
         }
+        
+        echo "✅ Created academic years data\n";
     }
 }
