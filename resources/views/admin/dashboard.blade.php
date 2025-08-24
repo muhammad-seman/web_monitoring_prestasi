@@ -239,11 +239,24 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.41.0/dist/apexcharts.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Area Chart Prestasi per Bulan
+    // Debug data
+    console.log('Prestasi per Bulan Data:', @json($prestasiPerBulan));
+    console.log('Prestasi per Kategori Data:', @json($prestasiPerKategori));
+
+    // Prepare data for Area Chart Prestasi per Bulan
+    var prestasiData = @json($prestasiPerBulan->pluck('total')->toArray());
+    var prestasiBulan = @json($prestasiPerBulan->pluck('bulan')->toArray());
+    
+    // If no data, show placeholder
+    if (!prestasiData || prestasiData.length === 0) {
+        prestasiData = [0];
+        prestasiBulan = ['-'];
+    }
+
     var prestasiOptions = {
         series: [{
             name: 'Prestasi',
-            data: @json($prestasiPerBulan->pluck('total')->toArray() ?: [0])
+            data: prestasiData
         }],
         chart: {
             type: 'area',
@@ -258,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
             gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.2, stops: [0, 90, 100] }
         },
         xaxis: {
-            categories: @json($prestasiPerBulan->pluck('bulan')->toArray() ?: ['-']),
+            categories: prestasiBulan,
             labels: {
                 formatter: function(value) {
                     if (!value || value === '-') return '-';
@@ -269,22 +282,58 @@ document.addEventListener('DOMContentLoaded', function() {
         yaxis: {
             labels: { formatter: function(value) { return Math.round(value); } }
         },
-        tooltip: { x: { format: 'MMM yyyy' } }
+        tooltip: { x: { format: 'MMM yyyy' } },
+        noData: {
+            text: 'Belum ada data prestasi',
+            align: 'center',
+            verticalAlign: 'middle'
+        }
     };
-    var prestasiChart = new ApexCharts(document.querySelector("#prestasi-chart"), prestasiOptions);
-    prestasiChart.render();
 
-    // Donut Chart Prestasi per Kategori
+    try {
+        var prestasiChart = new ApexCharts(document.querySelector("#prestasi-chart"), prestasiOptions);
+        prestasiChart.render();
+        console.log('Prestasi chart rendered successfully');
+    } catch(error) {
+        console.error('Error rendering prestasi chart:', error);
+    }
+
+    // Prepare data for Donut Chart Prestasi per Kategori  
+    var kategoriData = @json($prestasiPerKategori->pluck('total')->toArray());
+    var kategoriLabels = @json($prestasiPerKategori->pluck('kategori')->toArray());
+
+    // If no data, show placeholder
+    if (!kategoriData || kategoriData.length === 0) {
+        kategoriData = [1];
+        kategoriLabels = ['Belum ada data'];
+    }
+
     var kategoriOptions = {
-        series: @json($prestasiPerKategori->pluck('total')->toArray() ?: [0]),
+        series: kategoriData,
         chart: { type: 'donut', height: 300 },
-        labels: @json($prestasiPerKategori->pluck('kategori')->toArray() ?: ['-']),
-        colors: ['#7367F0', '#28C76F', '#EA5455', '#FF9F43', '#1E9FF2'],
-        plotOptions: { pie: { donut: { size: '65%' } } },
-        legend: { position: 'bottom' }
+        labels: kategoriLabels,
+        colors: ['#7367F0', '#28C76F', '#EA5455', '#FF9F43', '#1E9FF2', '#00D4AA', '#826AF9'],
+        plotOptions: { 
+            pie: { 
+                donut: { size: '65%' },
+                expandOnClick: false
+            } 
+        },
+        legend: { position: 'bottom' },
+        noData: {
+            text: 'Belum ada data kategori prestasi',
+            align: 'center',
+            verticalAlign: 'middle'
+        }
     };
-    var kategoriChart = new ApexCharts(document.querySelector("#kategori-chart"), kategoriOptions);
-    kategoriChart.render();
+
+    try {
+        var kategoriChart = new ApexCharts(document.querySelector("#kategori-chart"), kategoriOptions);
+        kategoriChart.render();
+        console.log('Kategori chart rendered successfully');
+    } catch(error) {
+        console.error('Error rendering kategori chart:', error);
+    }
 });
 </script>
 

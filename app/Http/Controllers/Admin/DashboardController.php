@@ -99,7 +99,27 @@ class DashboardController extends Controller
                 ->join('kategori_prestasi', 'prestasi_siswa.id_kategori_prestasi', '=', 'kategori_prestasi.id')
                 ->where('prestasi_siswa.status', 'diterima')
                 ->when($currentTahunAjaran, function($q) use ($currentTahunAjaran) {
-                    return $q->where('prestasi_siswa.id_tahun_ajaran', $currentTahunAjaran->id);
+                    // Check if prestasi have id_tahun_ajaran data
+                    $hasAcademicYearData = PrestasiSiswa::whereNotNull('id_tahun_ajaran')->exists();
+                    
+                    if ($hasAcademicYearData) {
+                        return $q->where('prestasi_siswa.id_tahun_ajaran', $currentTahunAjaran->id);
+                    } else {
+                        // Check if any prestasi exists in current academic year date range
+                        $prestasiInRange = PrestasiSiswa::where('status', 'diterima')
+                            ->where('tanggal_prestasi', '>=', $currentTahunAjaran->tanggal_mulai)
+                            ->where('tanggal_prestasi', '<=', $currentTahunAjaran->tanggal_selesai)
+                            ->exists();
+                        
+                        if ($prestasiInRange) {
+                            // Filter by date range if data exists in range
+                            return $q->where('tanggal_prestasi', '>=', $currentTahunAjaran->tanggal_mulai)
+                                     ->where('tanggal_prestasi', '<=', $currentTahunAjaran->tanggal_selesai);
+                        } else {
+                            // If no data in academic year range, show all data
+                            return $q;
+                        }
+                    }
                 })
                 ->groupBy('kategori_prestasi.id', 'kategori_prestasi.nama_kategori', 'kategori_prestasi.jenis_prestasi', 'kategori_prestasi.tingkat_kompetisi')
                 ->orderBy('total', 'desc')
@@ -136,11 +156,46 @@ class DashboardController extends Controller
                 )
                 ->where('prestasi_siswa.status', 'diterima')
                 ->when($currentTahunAjaran, function($q) use ($currentTahunAjaran) {
-                    return $q->where('prestasi_siswa.id_tahun_ajaran', $currentTahunAjaran->id)
-                             ->where('tanggal_prestasi', '>=', $currentTahunAjaran->tanggal_mulai)
-                             ->where('tanggal_prestasi', '<=', $currentTahunAjaran->tanggal_selesai);
+                    // Check if prestasi have id_tahun_ajaran data
+                    $hasAcademicYearData = PrestasiSiswa::whereNotNull('id_tahun_ajaran')->exists();
+                    
+                    if ($hasAcademicYearData) {
+                        return $q->where('prestasi_siswa.id_tahun_ajaran', $currentTahunAjaran->id)
+                                 ->where('tanggal_prestasi', '>=', $currentTahunAjaran->tanggal_mulai)
+                                 ->where('tanggal_prestasi', '<=', $currentTahunAjaran->tanggal_selesai);
+                    } else {
+                        // Check if any prestasi exists in current academic year date range
+                        $prestasiInRange = PrestasiSiswa::where('status', 'diterima')
+                            ->where('tanggal_prestasi', '>=', $currentTahunAjaran->tanggal_mulai)
+                            ->where('tanggal_prestasi', '<=', $currentTahunAjaran->tanggal_selesai)
+                            ->exists();
+                        
+                        if ($prestasiInRange) {
+                            // Filter by academic year date range if data exists
+                            return $q->where('tanggal_prestasi', '>=', $currentTahunAjaran->tanggal_mulai)
+                                     ->where('tanggal_prestasi', '<=', $currentTahunAjaran->tanggal_selesai);
+                        } else {
+                            // If no data in academic year range, get last 6 months from current date
+                            return $q->where('tanggal_prestasi', '>=', now()->subMonths(6)->format('Y-m-d'));
+                        }
+                    }
                 }, function($q) {
-                    return $q->where('tanggal_prestasi', '>=', now()->subMonths(6));
+                    // If no current academic year, get all available data or last 12 months (whichever is earlier)
+                    $oldestPrestasi = PrestasiSiswa::where('status', 'diterima')
+                        ->orderBy('tanggal_prestasi', 'asc')
+                        ->first();
+                    
+                    if ($oldestPrestasi && $oldestPrestasi->tanggal_prestasi) {
+                        // Use the earlier of: oldest prestasi date or 12 months ago
+                        $startDate = min(
+                            $oldestPrestasi->tanggal_prestasi,
+                            now()->subMonths(12)->format('Y-m-d')
+                        );
+                        return $q->where('tanggal_prestasi', '>=', $startDate);
+                    }
+                    
+                    // Fallback: show all data if we can't determine oldest date
+                    return $q;
                 })
                 ->groupBy('bulan')
                 ->orderBy('bulan')

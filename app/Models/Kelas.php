@@ -17,6 +17,12 @@ class Kelas extends Model
         return $this->belongsTo(User::class, 'id_wali_kelas');
     }
 
+    // Alias untuk waliKelas (consistency with other naming)
+    public function waliKelas()
+    {
+        return $this->belongsTo(User::class, 'id_wali_kelas');
+    }
+
     // Alias untuk guru
     public function guru()
     {

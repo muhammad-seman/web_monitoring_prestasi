@@ -77,10 +77,19 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $se->siswa->nama ?? '-' }}</td>
                                 <td>{{ $se->siswa->nisn ?? '-' }}</td>
-                                <td>{{ $se->siswa->kelas->nama_kelas ?? '-' }}</td>
+                                <td>
+                                    @if($se->siswa->kelas)
+                                        {{ $se->siswa->kelas->nama_kelas }}
+                                        @if($se->siswa->kelas->tahun_ajaran)
+                                            - {{ $se->siswa->kelas->tahun_ajaran }}
+                                        @endif
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td>{{ $se->ekskul->nama ?? '-' }}</td>
                                 <td>{{ $se->ekskul->pembina ?? '-' }}</td>
-                                <td>{{ $se->created_at ? \Carbon\Carbon::parse($se->created_at)->format('d-m-Y') : '-' }}</td>
+                                <td>{{ $se->tanggal_mulai ? \Carbon\Carbon::parse($se->tanggal_mulai)->format('d-m-Y') : ($se->created_at ? \Carbon\Carbon::parse($se->created_at)->format('d-m-Y') : '-') }}</td>
                                 <td>
                                     <button class="btn btn-danger btn-sm" onclick="confirmDelete({{ $se->id }})" title="Hapus">
                                         <span class="iconify" data-icon="mdi:trash-can" data-width="18" data-height="18"></span>

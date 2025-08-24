@@ -7,13 +7,14 @@ use App\Http\Controllers\Controller;
 use App\Models\SiswaEkskul;
 use App\Models\Siswa;
 use App\Models\Ekstrakurikuler;
+use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class SiswaEkskulController extends Controller
 {
     /**
-     * Display a listing of siswa ekstrakurikuler.
+     * Display a listing of siswa ekstrakurikuler with academic year information.
      */
     public function index(Request $request)
     {
@@ -37,13 +38,24 @@ class SiswaEkskulController extends Controller
         // Data untuk dropdown filter
         $ekskul = Ekstrakurikuler::pluck('nama', 'id');
         $siswa = Siswa::with('kelas')->orderBy('nama')->get();
-        $kelas = \App\Models\Kelas::pluck('nama_kelas', 'id');
+        
+        // Get classes with academic year context for dropdown
+        $kelas = \App\Models\Kelas::get()
+            ->mapWithKeys(function($kelasItem) {
+                $displayName = $kelasItem->nama_kelas;
+                if ($kelasItem->tahun_ajaran) {
+                    $displayName .= ' - ' . $kelasItem->tahun_ajaran;
+                }
+                return [$kelasItem->id => $displayName];
+            });
 
-        return view('admin.siswa_ekskul.index', compact('siswaEkskul', 'ekskul', 'siswa', 'kelas'));
+        return view('admin.siswa_ekskul.index', compact(
+            'siswaEkskul', 'ekskul', 'siswa', 'kelas'
+        ));
     }
 
     /**
-     * Print siswa ekstrakurikuler data.
+     * Print siswa ekstrakurikuler data with academic year information.
      */
     public function cetak(Request $request)
     {
@@ -63,9 +75,16 @@ class SiswaEkskulController extends Controller
 
         $data['siswaEkskul'] = $query->get()->sortBy('siswa.nama');
 
-        // Data untuk filter info
+        // Data untuk filter info  
         $ekskul = Ekstrakurikuler::pluck('nama', 'id');
-        $kelas = \App\Models\Kelas::pluck('nama_kelas', 'id');
+        $kelas = \App\Models\Kelas::get()
+            ->mapWithKeys(function($kelasItem) {
+                $displayName = $kelasItem->nama_kelas;
+                if ($kelasItem->tahun_ajaran) {
+                    $displayName .= ' - ' . $kelasItem->tahun_ajaran;
+                }
+                return [$kelasItem->id => $displayName];
+            });
 
         $data['selectedEkskul'] = $request->ekskul ? $ekskul[$request->ekskul] : null;
         $data['selectedKelas'] = $request->kelas ? $kelas[$request->kelas] : null;

@@ -21,11 +21,24 @@ class KelasController extends Controller
     // Store kelas baru
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nama_kelas'    => 'required|string|max:50|unique:kelas,nama_kelas',
+        $request->validate([
+            'nama_kelas'    => 'required|string|max:50',
             'id_wali_kelas' => 'nullable|exists:users,id',
             'tahun_ajaran'  => 'required|string|max:20',
         ]);
+
+        // Check for unique combination of nama_kelas and tahun_ajaran
+        $exists = Kelas::where('nama_kelas', $request->nama_kelas)
+                       ->where('tahun_ajaran', $request->tahun_ajaran)
+                       ->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'nama_kelas' => 'Kombinasi nama kelas dan tahun ajaran sudah ada.'
+            ])->withInput();
+        }
+
+        $validated = $request->only(['nama_kelas', 'id_wali_kelas', 'tahun_ajaran']);
 
         $kls = Kelas::create($validated);
 
@@ -42,11 +55,25 @@ class KelasController extends Controller
     // Update kelas
     public function update(Request $request, Kelas $kela)
     {
-        $validated = $request->validate([
-            'nama_kelas'    => 'required|string|max:50|unique:kelas,nama_kelas,' . $kela->id,
+        $request->validate([
+            'nama_kelas'    => 'required|string|max:50',
             'id_wali_kelas' => 'nullable|exists:users,id',
             'tahun_ajaran'  => 'required|string|max:20',
         ]);
+
+        // Check for unique combination of nama_kelas and tahun_ajaran, excluding current record
+        $exists = Kelas::where('nama_kelas', $request->nama_kelas)
+                       ->where('tahun_ajaran', $request->tahun_ajaran)
+                       ->where('id', '!=', $kela->id)
+                       ->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'nama_kelas' => 'Kombinasi nama kelas dan tahun ajaran sudah ada.'
+            ])->withInput();
+        }
+
+        $validated = $request->only(['nama_kelas', 'id_wali_kelas', 'tahun_ajaran']);
 
         $kela->update($validated);
 

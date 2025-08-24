@@ -51,5 +51,21 @@ class User extends Authenticatable
         return $this->notifications()->where('is_read', false);
     }
 
-    // Tambahkan relasi lain jika perlu (siswa, wali, dll)
+    // Relasi untuk prestasi yang dibuat oleh user ini (guru/admin)
+    public function createdPrestasi()
+    {
+        return $this->hasMany(PrestasiSiswa::class, 'created_by');
+    }
+
+    // Relasi untuk prestasi yang divalidasi oleh user ini
+    public function validatedPrestasi()
+    {
+        return $this->hasMany(PrestasiSiswa::class, 'validated_by');
+    }
+
+    // Relasi untuk kelas yang diwali oleh guru ini
+    public function waliKelas()
+    {
+        return $this->hasMany(Kelas::class, 'id_wali_kelas');
+    }
 }

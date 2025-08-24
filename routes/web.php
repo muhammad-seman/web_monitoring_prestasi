@@ -25,6 +25,7 @@ use App\Http\Controllers\Guru\EkstrakurikulerController as GuruEkstrakurikulerCo
 use App\Http\Controllers\Guru\KategoriPrestasiController as GuruKategoriPrestasiController;
 use App\Http\Controllers\Guru\TingkatPenghargaanController as GuruTingkatPenghargaanController;
 use App\Http\Controllers\Guru\KelasController as GuruKelasController;
+use App\Http\Controllers\Guru\AnalyticsController as GuruAnalyticsController;
 
 // Kepala Sekolah Controllers
 use App\Http\Controllers\Kepala\DashboardController as KepalaDashboardController;
@@ -35,6 +36,8 @@ use App\Http\Controllers\Kepala\EkstrakurikulerController as KepalaEkstrakurikul
 use App\Http\Controllers\Kepala\UserController as KepalaUserController;
 use App\Http\Controllers\Kepala\LogController as KepalaLogController;
 use App\Http\Controllers\Kepala\NotifikasiController as KepalaNotifikasiController;
+use App\Http\Controllers\Kepala\AnalyticsController as KepalaAnalyticsController;
+use App\Http\Controllers\Kepala\ReportController as KepalaReportController;
 
 // Wali Controllers
 use App\Http\Controllers\Wali\DashboardController as WaliDashboardController;
@@ -128,8 +131,16 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     // Route::get('prestasi_siswa/{prestasi_siswa}', [GuruPrestasiSiswaController::class, 'show'])->name('prestasi_siswa.show');
     // Upload dokumen bukti
     Route::post('prestasi_siswa/{prestasi_siswa}/upload', [GuruPrestasiSiswaController::class, 'uploadDokumen'])->name('prestasi_siswa.upload');
-    // Validasi prestasi siswa
+    // Validasi prestasi siswa (original)
     Route::post('prestasi_siswa/{prestasi_siswa}/validasi', [GuruPrestasiSiswaController::class, 'validasi'])->name('prestasi_siswa.validasi');
+    
+    // Enhanced validation workflow
+    Route::get('prestasi_siswa/validation-dashboard', [GuruPrestasiSiswaController::class, 'validationDashboard'])->name('prestasi_siswa.validation_dashboard');
+    Route::post('prestasi_siswa/batch-validation', [GuruPrestasiSiswaController::class, 'batchValidation'])->name('prestasi_siswa.batch_validation');
+    Route::post('prestasi_siswa/{prestasi_siswa}/quick-validation', [GuruPrestasiSiswaController::class, 'quickValidation'])->name('prestasi_siswa.quick_validation');
+    Route::post('prestasi_siswa/{prestasi_siswa}/enhanced-validation', [GuruPrestasiSiswaController::class, 'enhancedValidation'])->name('prestasi_siswa.enhanced_validation');
+    Route::get('prestasi_siswa/{prestasi_siswa}/validation-history', [GuruPrestasiSiswaController::class, 'validationHistory'])->name('prestasi_siswa.validation_history');
+    
     // Cetak rekap prestasi siswa di kelasnya
     Route::get('prestasi_siswa/cetak', [GuruPrestasiSiswaController::class, 'cetak'])->name('prestasi_siswa.cetak');
 
@@ -146,6 +157,12 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     // Kelas: Lihat detail kelas yang diampu
     Route::get('kelas', [GuruKelasController::class, 'index'])->name('kelas.index');
     Route::get('kelas/{kelas}', [GuruKelasController::class, 'show'])->name('kelas.show');
+    
+    // Analytics: Individual student analysis, class performance, progression tracking
+    Route::get('analytics', [GuruAnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('analytics/student/{siswa}', [GuruAnalyticsController::class, 'individualStudentAnalysis'])->name('analytics.student');
+    Route::get('analytics/class-performance', [GuruAnalyticsController::class, 'classPerformanceAnalysis'])->name('analytics.class_performance');
+    Route::get('analytics/student-progression/{siswa}', [GuruAnalyticsController::class, 'studentProgressionTracking'])->name('analytics.student_progression');
 });
 
 // Kepala Sekolah only (prefix dan middleware)
@@ -176,6 +193,24 @@ Route::middleware(['auth', 'role:kepala_sekolah'])->prefix('kepala')->name('kepa
 
     // Log Aktivitas: Lihat history aktivitas penting terkait validasi/prestasi
     Route::get('logs', [KepalaLogController::class, 'index'])->name('logs.index');
+    
+    // Advanced Analytics: School-wide performance analytics and strategic insights
+    Route::get('analytics', [KepalaAnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('analytics/school-performance', [KepalaAnalyticsController::class, 'schoolPerformance'])->name('analytics.school_performance');
+    Route::get('analytics/teacher-analysis', [KepalaAnalyticsController::class, 'teacherAnalysis'])->name('analytics.teacher_analysis');
+    Route::get('analytics/department-analysis', [KepalaAnalyticsController::class, 'departmentAnalysis'])->name('analytics.department_analysis');
+    Route::get('analytics/comparative-analysis', [KepalaAnalyticsController::class, 'comparativeAnalysis'])->name('analytics.comparative_analysis');
+    Route::get('analytics/strategic-forecasting', [KepalaAnalyticsController::class, 'strategicForecasting'])->name('analytics.strategic_forecasting');
+    
+    // Strategic Planning Reports: Comprehensive reporting system for executive decision making
+    Route::get('reports', [KepalaReportController::class, 'index'])->name('reports.index');
+    Route::post('reports/annual-performance', [KepalaReportController::class, 'annualPerformanceReport'])->name('reports.annual_performance');
+    Route::post('reports/strategic-planning', [KepalaReportController::class, 'strategicPlanningReport'])->name('reports.strategic_planning');
+    Route::post('reports/resource-allocation', [KepalaReportController::class, 'resourceAllocationReport'])->name('reports.resource_allocation');
+    Route::post('reports/teacher-performance', [KepalaReportController::class, 'teacherPerformanceReport'])->name('reports.teacher_performance');
+    Route::post('reports/comparative-analysis', [KepalaReportController::class, 'comparativeAnalysisReport'])->name('reports.comparative_analysis');
+    Route::post('reports/goal-tracking', [KepalaReportController::class, 'goalTrackingReport'])->name('reports.goal_tracking');
+    Route::post('reports/executive-summary', [KepalaReportController::class, 'executiveSummaryReport'])->name('reports.executive_summary');
 });
 
 // Wali only (prefix dan middleware)
@@ -193,6 +228,22 @@ Route::middleware(['auth', 'role:wali'])->prefix('wali')->name('wali.')->group(f
     // Dokumen Prestasi: Lihat dan download dokumen
     Route::get('dokumen', [WaliDokumenController::class, 'index'])->name('dokumen.index');
     Route::get('dokumen/{id}/download', [WaliDokumenController::class, 'download'])->name('dokumen.download');
+    
+    // Child Progress Detailed Tracking: Comprehensive child analytics and monitoring
+    Route::get('analytics/child/{childId}', [\App\Http\Controllers\Wali\AnalyticsController::class, 'childAnalysis'])->name('analytics.child_analysis');
+    Route::get('analytics/engagement', [\App\Http\Controllers\Wali\AnalyticsController::class, 'engagementAnalytics'])->name('analytics.engagement');
+    Route::get('analytics/family', [\App\Http\Controllers\Wali\AnalyticsController::class, 'familyAnalytics'])->name('analytics.family');
+    Route::get('analytics/notifications', [\App\Http\Controllers\Wali\AnalyticsController::class, 'notificationAnalytics'])->name('analytics.notifications');
+    Route::get('analytics/communication', [\App\Http\Controllers\Wali\AnalyticsController::class, 'communicationAnalytics'])->name('analytics.communication');
+    
+    // Parent-Teacher Communication: Comprehensive communication management system
+    Route::get('communication', [\App\Http\Controllers\Wali\CommunicationController::class, 'index'])->name('communication.index');
+    Route::post('communication/send-message', [\App\Http\Controllers\Wali\CommunicationController::class, 'sendMessage'])->name('communication.send_message');
+    Route::post('communication/schedule-meeting', [\App\Http\Controllers\Wali\CommunicationController::class, 'scheduleMeeting'])->name('communication.schedule_meeting');
+    Route::get('communication/conversation/{teacherId}', [\App\Http\Controllers\Wali\CommunicationController::class, 'getConversation'])->name('communication.conversation');
+    Route::put('communication/notification-preferences', [\App\Http\Controllers\Wali\CommunicationController::class, 'updateNotificationPreferences'])->name('communication.notification_preferences');
+    Route::get('communication/analytics', [\App\Http\Controllers\Wali\CommunicationController::class, 'analytics'])->name('communication.analytics');
+    Route::post('communication/export-report', [\App\Http\Controllers\Wali\CommunicationController::class, 'exportReport'])->name('communication.export_report');
 });
 
 // Siswa only (prefix dan middleware)
@@ -218,6 +269,25 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
 
     // Cetak rekap prestasi (filter di index, tidak ada menu terpisah)
     Route::get('prestasi/cetak', [\App\Http\Controllers\Siswa\PrestasiController::class, 'cetak'])->name('prestasi.cetak');
+    
+    // Personal Achievement Portfolio: Comprehensive portfolio management system
+    Route::get('portfolio', [\App\Http\Controllers\Siswa\PortfolioController::class, 'index'])->name('portfolio.index');
+    Route::get('portfolio/analytics', [\App\Http\Controllers\Siswa\PortfolioController::class, 'analytics'])->name('portfolio.analytics');
+    Route::get('portfolio/timeline', [\App\Http\Controllers\Siswa\PortfolioController::class, 'timeline'])->name('portfolio.timeline');
+    Route::get('portfolio/gallery', [\App\Http\Controllers\Siswa\PortfolioController::class, 'gallery'])->name('portfolio.gallery');
+    Route::get('portfolio/skills-matrix', [\App\Http\Controllers\Siswa\PortfolioController::class, 'skillsMatrix'])->name('portfolio.skills_matrix');
+    Route::get('portfolio/export', [\App\Http\Controllers\Siswa\PortfolioController::class, 'exportPortfolio'])->name('portfolio.export');
+    Route::post('portfolio/share', [\App\Http\Controllers\Siswa\PortfolioController::class, 'sharePortfolio'])->name('portfolio.share');
+    
+    // Goals Setting and Monitoring: Personal goals management with progress tracking
+    Route::get('goals', [\App\Http\Controllers\Siswa\GoalsController::class, 'index'])->name('goals.index');
+    Route::post('goals', [\App\Http\Controllers\Siswa\GoalsController::class, 'store'])->name('goals.store');
+    Route::put('goals/{goalId}/progress', [\App\Http\Controllers\Siswa\GoalsController::class, 'updateProgress'])->name('goals.update_progress');
+    Route::post('goals/{goalId}/complete', [\App\Http\Controllers\Siswa\GoalsController::class, 'complete'])->name('goals.complete');
+    Route::get('goals/analytics', [\App\Http\Controllers\Siswa\GoalsController::class, 'analytics'])->name('goals.analytics');
+    Route::get('goals/suggestions', [\App\Http\Controllers\Siswa\GoalsController::class, 'suggestions'])->name('goals.suggestions');
+    Route::post('goals/share', [\App\Http\Controllers\Siswa\GoalsController::class, 'share'])->name('goals.share');
+    Route::get('goals/public/{token}', [\App\Http\Controllers\Siswa\GoalsController::class, 'publicView'])->name('goals.public');
 });
 
 // Jika nanti role 'wali', 'siswa', dll tinggal tambahkan group serupa:

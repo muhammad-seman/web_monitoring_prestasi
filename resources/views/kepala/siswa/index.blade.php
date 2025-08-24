@@ -11,7 +11,7 @@
             <select name="kelas_id" class="form-control">
               <option value="">-- Semua Kelas --</option>
               @foreach($kelas as $k)
-                <option value="{{ $k->id }}" {{ request('kelas_id') == $k->id ? 'selected' : '' }}>{{ $k->nama_kelas }}</option>
+                <option value="{{ $k->id }}" {{ request('kelas_id') == $k->id ? 'selected' : '' }}>{{ $k->display_name }}</option>
               @endforeach
             </select>
           </div>
