@@ -13,6 +13,8 @@ use App\Models\KategoriPrestasi;
 use App\Models\TingkatPenghargaan;
 use App\Models\Ekstrakurikuler;
 use App\Models\SiswaEkskul;
+use App\Models\KenaikanKelas;
+use App\Models\Notification;
 
 class ComprehensiveAllRolesSeeder extends Seeder
 {
@@ -39,6 +41,8 @@ class ComprehensiveAllRolesSeeder extends Seeder
         \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0');
         
         // Clear in proper order
+        \Illuminate\Support\Facades\DB::table('notifications')->delete();
+        \Illuminate\Support\Facades\DB::table('kenaikan_kelas')->delete();
         \Illuminate\Support\Facades\DB::table('prestasi_siswa')->delete();
         \Illuminate\Support\Facades\DB::table('siswa_ekskul')->delete();
         \Illuminate\Support\Facades\DB::table('users')->delete();
@@ -447,8 +451,11 @@ class ComprehensiveAllRolesSeeder extends Seeder
                             'id_siswa' => $siswa->id,
                             'id_ekskul' => $ekskulId,
                             'tanggal_mulai' => now()->subMonths(rand(1, 12)),
+                            'tanggal_selesai' => null,
                             'status_keaktifan' => 'aktif',
-                            'tahun_ajaran' => '2024/2025'
+                            'tahun_ajaran' => '2024/2025',
+                            'semester' => rand(0, 1) ? 'ganjil' : 'genap',
+                            'keterangan' => 'Aktif mengikuti kegiatan ekstrakurikuler'
                         ]);
                     }
                 }
@@ -459,10 +466,13 @@ class ComprehensiveAllRolesSeeder extends Seeder
                 $prestasiNames = $this->getRealisticPrestasiNames($studentData['prestasi_count']);
                 
                 for ($p = 0; $p < $studentData['prestasi_count']; $p++) {
+                    $selectedEkskul = !empty($studentData['ekskul_ids']) ? $studentData['ekskul_ids'][array_rand($studentData['ekskul_ids'])] : null;
+                    
                     PrestasiSiswa::create([
                         'id_siswa' => $siswa->id,
                         'id_kategori_prestasi' => $kategoriPrestasi->random()->id,
                         'id_tingkat_penghargaan' => $tingkatPenghargaan->random()->id,
+                        'id_ekskul' => $selectedEkskul,
                         'id_tahun_ajaran' => $currentTahunAjaran ? $currentTahunAjaran->id : null,
                         'nama_prestasi' => $prestasiNames[$p] ?? "Prestasi " . ($p + 1),
                         'penyelenggara' => $this->getRandomOrganizer(),
@@ -470,16 +480,103 @@ class ComprehensiveAllRolesSeeder extends Seeder
                         'keterangan' => 'Prestasi yang diraih dengan usaha keras dan dedikasi tinggi',
                         'status' => 'diterima',
                         'rata_rata_nilai' => rand(85, 95),
+                        'created_by' => 1, // Admin user ID
                     ]);
                 }
             }
         }
+        
+        // 5. CREATE KENAIKAN KELAS SAMPLE DATA FOR CLASS XI STUDENTS
+        echo "\n📈 Creating class progression data for XI students...\n";
+        $siswaXI = Siswa::whereHas('kelas', function($q) {
+            $q->where('nama_kelas', 'like', '%XI%');
+        })->get();
+        
+        $kelasXII = Kelas::where('nama_kelas', 'like', '%XII%')->get();
+        
+        if ($siswaXI->count() > 0 && $kelasXII->count() > 0 && $currentTahunAjaran) {
+            foreach ($siswaXI as $siswa) {
+                // Find appropriate XII class (maintain stream: IPA, IPS, BAHASA)
+                $currentClassName = $siswa->kelas->nama_kelas;
+                $stream = '';
+                if (str_contains($currentClassName, 'IPA')) $stream = 'IPA';
+                elseif (str_contains($currentClassName, 'IPS')) $stream = 'IPS';
+                elseif (str_contains($currentClassName, 'BAHASA')) $stream = 'BAHASA';
+                
+                $targetClass = $kelasXII->where('nama_kelas', 'like', "%XII {$stream}%")->first();
+                if (!$targetClass) $targetClass = $kelasXII->first();
+                
+                // Generate realistic criteria based on student's achievements
+                $totalPrestasi = PrestasiSiswa::where('id_siswa', $siswa->id)
+                    ->where('status', 'diterima')->count();
+                $avgNilai = PrestasiSiswa::where('id_siswa', $siswa->id)
+                    ->where('rata_rata_nilai', '>', 0)->avg('rata_rata_nilai') ?? 0;
+                
+                $criteria = [
+                    'total_prestasi' => $totalPrestasi,
+                    'rata_rata_nilai' => round($avgNilai, 2),
+                    'kehadiran' => rand(85, 98),
+                    'sikap' => rand(80, 95),
+                    'ekstrakurikuler_aktif' => SiswaEkskul::where('id_siswa', $siswa->id)
+                        ->where('status_keaktifan', 'aktif')->count() > 0,
+                    'evaluated_at' => now(),
+                ];
+                
+                // Determine status based on criteria
+                $status = 'naik';
+                if ($totalPrestasi < 1 && $avgNilai < 80) {
+                    $status = rand(0, 1) ? 'pending' : 'tidak_naik';
+                }
+                
+                KenaikanKelas::create([
+                    'id_siswa' => $siswa->id,
+                    'kelas_asal' => $siswa->id_kelas,
+                    'kelas_tujuan' => $targetClass->id,
+                    'tahun_ajaran_id' => $currentTahunAjaran->id,
+                    'status' => $status,
+                    'kriteria_kelulusan' => $criteria,
+                    'tanggal_kenaikan' => $status === 'naik' ? now()->addDays(rand(1, 30)) : null,
+                    'keterangan' => $status === 'naik' ? 'Memenuhi semua kriteria kenaikan kelas' : 
+                                   ($status === 'pending' ? 'Dalam evaluasi kenaikan kelas' : 'Belum memenuhi kriteria'),
+                    'created_by' => 1 // Admin user ID
+                ]);
+            }
+            echo "   ✓ Created " . $siswaXI->count() . " class progression records\n";
+        }
+        
+        // 6. CREATE NOTIFICATION SAMPLES
+        echo "\n🔔 Creating sample notifications...\n";
+        $allUsers = User::all();
+        $notificationTypes = [
+            ['type' => 'prestasi_baru', 'title' => 'Prestasi Baru Ditambahkan', 'message' => 'Prestasi siswa telah berhasil ditambahkan ke sistem'],
+            ['type' => 'validasi_prestasi', 'title' => 'Prestasi Menunggu Validasi', 'message' => 'Ada prestasi siswa yang menunggu validasi dari guru'],
+            ['type' => 'kenaikan_kelas', 'title' => 'Pengumuman Kenaikan Kelas', 'message' => 'Hasil kenaikan kelas telah diumumkan'],
+            ['type' => 'sistem', 'title' => 'Pembaruan Sistem', 'message' => 'Sistem monitoring prestasi telah diperbarui dengan fitur terbaru'],
+            ['type' => 'ekstrakurikuler', 'title' => 'Pendaftaran Ekstrakurikuler', 'message' => 'Periode pendaftaran ekstrakurikuler telah dibuka']
+        ];
+        
+        // Create notifications for different user roles
+        foreach ($allUsers->take(20) as $user) { // Limit to prevent too many notifications
+            $notification = $notificationTypes[array_rand($notificationTypes)];
+            Notification::create([
+                'user_id' => $user->id,
+                'type' => $notification['type'],
+                'title' => $notification['title'],
+                'message' => $notification['message'],
+                'data' => json_encode(['generated_by' => 'seeder', 'timestamp' => now()]),
+                'is_read' => rand(0, 1), // Random read status
+                'created_at' => now()->subDays(rand(0, 30))
+            ]);
+        }
+        echo "   ✓ Created notification samples for users\n";
         
         // Summary
         $totalUsers = User::count();
         $totalSiswa = Siswa::count();
         $totalPrestasi = PrestasiSiswa::count();
         $totalEkskul = SiswaEkskul::count();
+        $totalKenaikanKelas = KenaikanKelas::count();
+        $totalNotifications = Notification::count();
         
         echo "\n🎉 COMPREHENSIVE ALL-ROLES SEEDER COMPLETED!\n";
         echo str_repeat("=", 60) . "\n";
@@ -492,6 +589,8 @@ class ComprehensiveAllRolesSeeder extends Seeder
         echo "   🔐 Total User accounts: {$totalUsers}\n";
         echo "   🏆 Achievement records: {$totalPrestasi}\n";
         echo "   🎯 Extracurricular assignments: {$totalEkskul}\n";
+        echo "   📈 Class progression records: {$totalKenaikanKelas}\n";
+        echo "   🔔 Notification samples: {$totalNotifications}\n";
         echo "\n🎓 Login credentials for all roles:\n";
         echo "   👑 Admin: admin/admin123, admin_it/admin123\n";
         echo "   🎓 Kepala Sekolah: kepsek/kepsek123\n";
